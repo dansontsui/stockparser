@@ -56,3 +56,4 @@ def startParser(sotckid):
     major_data.collectdata(sotckid+"_"+filedate+'.csv',filedate,sotckid)
 if __name__ == '__main__':
     startParser('8299')
+    

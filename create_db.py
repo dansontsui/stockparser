@@ -6,7 +6,22 @@ import sys
 from bs4 import BeautifulSoup 
 import datetime
 import re
+#if db not exists
 
+def check_db_file_exist(stockid):
+    filepath = stockid+"_database.csv"
+    foder = stockid
+    if os.path.isdir(foder):
+        print('dir exists')
+    else:
+        print('dir not exists')
+        #create folder
+    # 檢查檔案是否存在
+    if os.path.isfile(filepath):
+        print("檔案存在。")
+    else:
+        print("檔案不存在。")
+        return
 '''
 date = '20180102'
 r = requests.get('https://tw.stock.yahoo.com/d/s/major_8299.html')
@@ -14,6 +29,7 @@ f = open("major.txt", mode='w', encoding='utf-8')
 f.write(r.text)
 f.close()
 '''
+check_db_file_exist("8299")
 #f = open("major.txt", mode='r', encoding='utf-8')
 #fs = f.read()
 #soup = BeautifulSoup(open(fs),'html.parser')
