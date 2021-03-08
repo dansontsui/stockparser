@@ -9,6 +9,8 @@ import pandas as pd
 from datetime import timedelta
 import httplib2
 from urllib.parse import urlencode
+import requests
+from io import StringIO
 
 def twdate(date):
 
@@ -73,45 +75,32 @@ def downloadTWSE(date):
 
 def downloadOTC(date):
 
-    url='http://www.tpex.org.tw/web/stock/aftertrading/otc_quotes_no1430/stk_wn1430_print.php?l=zh-tw&d='+twdate(date)+'&se=EW'
+    url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d=110/03/04&s=0,asc,0'
+    
+    r = requests.post(url)
+    
+# 整理資料，變成表格
+    df = pd.read_csv(StringIO(r.text))
 
+    # url='http://www.tpex.org.tw/web/stock/aftertrading/otc_quotes_no1430/stk_wn1430_print.php?l=zh-tw&d='+twdate(date)+'&se=EW'
 
     table = pd.read_html(url)[0]
-
-    rowCount = table.values.shape[0]-1;
-
+    rowCount = table.values.shape[0]-1
     srcOTC = table.values[:rowCount].tolist()
-
-
-
     #search stock list
-
     firstIndex=0
-
     lastIndex=0
-
     for i in range(len(srcOTC)):
-
         row = srcOTC[i]
-
         if (row[0]=='1258'):  #1st stock ID
-
             firstIndex=i
-
         elif (row[0]=='9962'):  #lastest stock ID
-
             lastIndex=i+1
-
             break
-
     #print('OTC index=',firstIndex,lastIndex)
-
     listOTC = srcOTC[firstIndex:lastIndex]
-
     resultOTC = [row[:2]+row[4:7]+row[2:3]+row[7:8] for row in listOTC]
-
     #print(resultOTC[0])
-
     return resultOTC
 
 
@@ -140,6 +129,7 @@ def showStock(stockID, stockName, Open, High, Low, Close,Volume):
 
 downloadDate= dt.date.today() - timedelta(days=2)
 # download TWSE
+'''
 listTWSE = downloadTWSE(downloadDate)
 
 #get result
@@ -164,7 +154,7 @@ print('TWSE count=',len(stockID))
 #showStock(stockID, stockName, Open, High, Low, Close,Volume)
 
 
-
+'''
 #download OTC
 
 listOTC=downloadOTC(downloadDate)
