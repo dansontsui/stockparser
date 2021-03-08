@@ -11,17 +11,13 @@ import httplib2
 from urllib.parse import urlencode
 import requests
 from io import StringIO
+import re
 
 def twdate(date):
-
     year  = date.year-1911
-
     month = date.month
-
     day   = date.day
-
     twday = '{}/{:02}/{:02}'.format(year,month,day)
-
     return twday
 
 
@@ -73,14 +69,89 @@ def downloadTWSE(date):
 
 
 
-def downloadOTC(date):
+def downloadOTC1(date):
 
-    url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d=110/03/04&s=0,asc,0'
-    
+    # 整理資料，變成表格
+    f = open("otcstock.csv", mode='r', encoding='utf-8')
+    #r = f.read()
+    #f.close()
+    #sio = StringIO(r)
+    line2 = ''
+    start = 0
+    end = 0
+    for line1 in f.readlines():
+        if len(line1) <=1:
+            continue
+        if line1.find('代號') >=0:
+            start = 1
+        if line1.find('管理股票') >=0:
+            end = 1
+        if start==1 and end==0:
+            line2 += line1
+    f.close()            
+    f = open("otcstock_reset.csv", mode='w', encoding='utf-8')
+    f.write(line2)
+    f.close()
+    df = pd.read_csv('otcstock_reset.csv')
+    return 
+
+def internet_otc_to_csv(IOtext):
+    start = 0
+    end  = 0
+    sdate = ''
+    line2 = ''
+    for line1 in IOtext.readlines():
+        if len(line1) <=1:
+            continue
+        if line1.find('資料日期')>=0:
+            r = re.search(r'\d+\S+',line1)
+            d = r.group()
+            s = d.split('/')
+            sdate = s[0] + s[1] + s[2]
+        if line1.find('代號') >=0:
+            start = 1
+        if line1.find('管理股票') >=0:
+            end = 1
+        if start==1 and end==0:
+            line2 += line1
+    filename = sdate+"_otcstock.csv"
+    f = open(filename, mode='w', encoding='utf-8')
+    f.write(line2)
+    f.close()
+    return filename
+
+def downloadOTCoriginaldate(date):
+    sd = twdate(date)
+    sd1=sd.split('/')
+    sd2 = sd1[0] + sd1[1] + sd1[2]
+    url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d='+sd+'&s=0,asc,0'
+    url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d='+sd+'&s=0,asc,0'
     r = requests.post(url)
-    
+
 # 整理資料，變成表格
-    df = pd.read_csv(StringIO(r.text))
+    f = open(sd2+"_orginal_data.csv", mode='w', encoding='utf-8')
+    sio = StringIO(r.text)
+    f.write(sio.read())
+    f.close()
+def downloadOTC(date):
+    sd = twdate(date)
+    sd1=sd.split('/')
+    sd2 = sd1[0] + sd1[1] + sd1[2]
+    url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d='+sd+'&s=0,asc,0'
+          
+    r = requests.post(url)
+# 整理資料，變成表格
+    f = open(sd2+"_orginal_data.csv", mode='w', encoding='utf-8')
+    sio = StringIO(r.text)
+    f.write(sio.read())
+    f.close()
+    sio.seek(0)
+    #sio = StringIO(r.text)
+    fileName = internet_otc_to_csv(sio)
+    
+    df = pd.read_csv(fileName)
+    return 
+    df = pd.read_csv(r.text)
 
     # url='http://www.tpex.org.tw/web/stock/aftertrading/otc_quotes_no1430/stk_wn1430_print.php?l=zh-tw&d='+twdate(date)+'&se=EW'
 
@@ -127,7 +198,8 @@ def showStock(stockID, stockName, Open, High, Low, Close,Volume):
 
 #main
 
-downloadDate= dt.date.today() - timedelta(days=2)
+downloadDate= dt.date.today() #- timedelta(days=2)
+
 # download TWSE
 '''
 listTWSE = downloadTWSE(downloadDate)
@@ -156,7 +228,7 @@ print('TWSE count=',len(stockID))
 
 '''
 #download OTC
-
+#listOTC = downloadOTC1(downloadDate)
 listOTC=downloadOTC(downloadDate)
 
 #get result
