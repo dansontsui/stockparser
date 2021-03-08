@@ -125,14 +125,14 @@ def downloadOTCoriginaldate(date):
     sd1=sd.split('/')
     sd2 = sd1[0] + sd1[1] + sd1[2]
     url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d='+sd+'&s=0,asc,0'
-    url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d='+sd+'&s=0,asc,0'
+    #url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d='+sd+'&s=0,asc,0'
     r = requests.post(url)
-
 # 整理資料，變成表格
     f = open(sd2+"_orginal_data.csv", mode='w', encoding='utf-8')
     sio = StringIO(r.text)
     f.write(sio.read())
     f.close()
+
 def downloadOTC(date):
     sd = twdate(date)
     sd1=sd.split('/')
