@@ -390,7 +390,7 @@ function stockmenu_submit (form)
                     <span style="color: #0f69ff;">台股代號查詢</span>
                 </a>
             </div>
-            <div class="stockInfos"><span id=marketTimeCountDown>距離台股收盤還有0小時23分鐘</span><a id="refreshBtn" href="#" style="color: #0f69ff;">更新</a></div>        </div>
+            <div class="stockInfos"><span id=marketTimeCountDown>距離美股開盤還有8小時57分鐘</span><a href="javascript:window.location.reload();" style="color: #0f69ff;">更新</a></div>        </div>
     </div>
 </div>
 <script type="text/javascript" charset="UTF-8">
@@ -401,7 +401,6 @@ function stockmenu_submit (form)
     }
     var stockInput = document.querySelector('#stockSearchBar #stock_id');
     var closeBtn = document.querySelector('#stockSearchBar #closeBtn');
-    var refreshBtn = document.querySelector('#stockSearchBar #refreshBtn');
     stockInput.addEventListener('input', function(e) {
         if (stockInput.value.length) {
             closeBtn.style.display= "block"
@@ -412,13 +411,6 @@ function stockmenu_submit (form)
     closeBtn.addEventListener('click', function() {
         stockInput.value = '';
         closeBtn.style.display= "none"
-    });
-    refreshBtn && refreshBtn.addEventListener('click', function(e) {
-        if (rapidInstance) {
-            rapidInstance.beaconClick('twfin-nav', '更新', null, { itc: 0 }, null, function(e) {
-                window.location.reload();
-            });
-        }
     });
 
     var marketTimeCountDownElem = document.getElementById('marketTimeCountDown');
@@ -484,7 +476,7 @@ function stockmenu_submit (form)
  <td colspan="2"> 
         <table border="0" width="100%" cellpadding="2" height="23">
           <tr>
-            <td width="180" align="left" class="tt">資料日期：110 /03 /05 
+            <td width="180" align="left" class="tt">資料日期：110 /03 /03 
             </td> 
             <td width="240" align="center" class="ttt">個 股 當 日 主 力 進 出</td>
   <td width="180" align="right" class="tt">單位：張數
@@ -502,154 +494,154 @@ function stockmenu_submit (form)
      <td class="ttt" align="center">賣超</td>
         </tr>
             <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">群益金鼎-忠孝 </td>
-          <td class="ttt" align="center">58 </td>
+          <td class="ttt" align="center">元大證券 </td>
+          <td class="ttt" align="center">1065 </td>
+          <td class="ttt" align="center">10 </td>
+          <td class="ttt" align="center">+1055 </td>
+          <td class="ttt" align="center">元富 </td>
           <td class="ttt" align="center">0 </td>
-          <td class="ttt" align="center">+58 </td>
-          <td class="ttt" align="center">摩根大通 </td>
-          <td class="ttt" align="center">29 </td>
-          <td class="ttt" align="center">391 </td>
-          <td class="ttt" align="center">-362 </td>
+          <td class="ttt" align="center">96 </td>
+          <td class="ttt" align="center">-96 </td>
           </tr>
                   <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">凱基-台北 </td>
-          <td class="ttt" align="center">101 </td>
-          <td class="ttt" align="center">47 </td>
-          <td class="ttt" align="center">+54 </td>
-          <td class="ttt" align="center">國泰證券 </td>
-          <td class="ttt" align="center">4 </td>
-          <td class="ttt" align="center">351 </td>
-          <td class="ttt" align="center">-347 </td>
-          </tr>
-                  <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">群益金鼎-竹南 </td>
-          <td class="ttt" align="center">53 </td>
-          <td class="ttt" align="center">1 </td>
-          <td class="ttt" align="center">+52 </td>
           <td class="ttt" align="center">台灣摩根士丹利 </td>
-          <td class="ttt" align="center">11 </td>
-          <td class="ttt" align="center">166 </td>
-          <td class="ttt" align="center">-155 </td>
-          </tr>
-                  <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">富邦證券 </td>
-          <td class="ttt" align="center">50 </td>
-          <td class="ttt" align="center">14 </td>
-          <td class="ttt" align="center">+36 </td>
-          <td class="ttt" align="center">美林 </td>
-          <td class="ttt" align="center">59 </td>
-          <td class="ttt" align="center">190 </td>
-          <td class="ttt" align="center">-131 </td>
-          </tr>
-                  <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">日盛-員林 </td>
-          <td class="ttt" align="center">29 </td>
-          <td class="ttt" align="center">1 </td>
-          <td class="ttt" align="center">+28 </td>
-          <td class="ttt" align="center">凱基 </td>
-          <td class="ttt" align="center">8 </td>
-          <td class="ttt" align="center">113 </td>
-          <td class="ttt" align="center">-105 </td>
-          </tr>
-                  <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">第一金-高雄 </td>
-          <td class="ttt" align="center">28 </td>
-          <td class="ttt" align="center">3 </td>
-          <td class="ttt" align="center">+25 </td>
-          <td class="ttt" align="center">新加坡商瑞銀 </td>
-          <td class="ttt" align="center">0 </td>
-          <td class="ttt" align="center">73 </td>
-          <td class="ttt" align="center">-73 </td>
-          </tr>
-                  <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">富邦-台北 </td>
-          <td class="ttt" align="center">32 </td>
-          <td class="ttt" align="center">7 </td>
-          <td class="ttt" align="center">+25 </td>
-          <td class="ttt" align="center">瑞士信貸 </td>
-          <td class="ttt" align="center">14 </td>
-          <td class="ttt" align="center">58 </td>
-          <td class="ttt" align="center">-44 </td>
-          </tr>
-                  <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">永豐金-內湖 </td>
-          <td class="ttt" align="center">23 </td>
-          <td class="ttt" align="center">1 </td>
-          <td class="ttt" align="center">+22 </td>
-          <td class="ttt" align="center">富邦-左營 </td>
-          <td class="ttt" align="center">0 </td>
-          <td class="ttt" align="center">44 </td>
-          <td class="ttt" align="center">-44 </td>
-          </tr>
-                  <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">兆豐-竹北 </td>
-          <td class="ttt" align="center">23 </td>
-          <td class="ttt" align="center">2 </td>
-          <td class="ttt" align="center">+21 </td>
+          <td class="ttt" align="center">79 </td>
+          <td class="ttt" align="center">19 </td>
+          <td class="ttt" align="center">+60 </td>
           <td class="ttt" align="center">港商野村 </td>
-          <td class="ttt" align="center">24 </td>
-          <td class="ttt" align="center">58 </td>
+          <td class="ttt" align="center">92 </td>
+          <td class="ttt" align="center">141 </td>
+          <td class="ttt" align="center">-49 </td>
+          </tr>
+                  <tr bgcolor="#FFFFFF">                                      
+          <td class="ttt" align="center">摩根大通 </td>
+          <td class="ttt" align="center">152 </td>
+          <td class="ttt" align="center">112 </td>
+          <td class="ttt" align="center">+40 </td>
+          <td class="ttt" align="center">國泰-高雄 </td>
+          <td class="ttt" align="center">9 </td>
+          <td class="ttt" align="center">47 </td>
+          <td class="ttt" align="center">-38 </td>
+          </tr>
+                  <tr bgcolor="#FFFFFF">                                      
+          <td class="ttt" align="center">美林 </td>
+          <td class="ttt" align="center">165 </td>
+          <td class="ttt" align="center">126 </td>
+          <td class="ttt" align="center">+39 </td>
+          <td class="ttt" align="center">凱基 </td>
+          <td class="ttt" align="center">2 </td>
+          <td class="ttt" align="center">36 </td>
           <td class="ttt" align="center">-34 </td>
           </tr>
                   <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">台新證券 </td>
+          <td class="ttt" align="center">香港上海匯豐 </td>
           <td class="ttt" align="center">30 </td>
-          <td class="ttt" align="center">10 </td>
-          <td class="ttt" align="center">+20 </td>
-          <td class="ttt" align="center">永豐金-竹科 </td>
-          <td class="ttt" align="center">10 </td>
-          <td class="ttt" align="center">36 </td>
-          <td class="ttt" align="center">-26 </td>
+          <td class="ttt" align="center">0 </td>
+          <td class="ttt" align="center">+30 </td>
+          <td class="ttt" align="center">台新證券 </td>
+          <td class="ttt" align="center">6 </td>
+          <td class="ttt" align="center">39 </td>
+          <td class="ttt" align="center">-33 </td>
           </tr>
                   <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">元大-新竹經國 </td>
-          <td class="ttt" align="center">26 </td>
-          <td class="ttt" align="center">6 </td>
-          <td class="ttt" align="center">+20 </td>
-          <td class="ttt" align="center">元大證券 </td>
-          <td class="ttt" align="center">34 </td>
-          <td class="ttt" align="center">58 </td>
+          <td class="ttt" align="center">凱基-台南 </td>
+          <td class="ttt" align="center">28 </td>
+          <td class="ttt" align="center">0 </td>
+          <td class="ttt" align="center">+28 </td>
+          <td class="ttt" align="center">土銀 </td>
+          <td class="ttt" align="center">1 </td>
+          <td class="ttt" align="center">31 </td>
+          <td class="ttt" align="center">-30 </td>
+          </tr>
+                  <tr bgcolor="#FFFFFF">                                      
+          <td class="ttt" align="center">新加坡商瑞銀 </td>
+          <td class="ttt" align="center">33 </td>
+          <td class="ttt" align="center">7 </td>
+          <td class="ttt" align="center">+26 </td>
+          <td class="ttt" align="center">美商高盛 </td>
+          <td class="ttt" align="center">0 </td>
+          <td class="ttt" align="center">29 </td>
+          <td class="ttt" align="center">-29 </td>
+          </tr>
+                  <tr bgcolor="#FFFFFF">                                      
+          <td class="ttt" align="center">元大-大天母 </td>
+          <td class="ttt" align="center">30 </td>
+          <td class="ttt" align="center">4 </td>
+          <td class="ttt" align="center">+26 </td>
+          <td class="ttt" align="center">統一-敦南 </td>
+          <td class="ttt" align="center">0 </td>
+          <td class="ttt" align="center">28 </td>
+          <td class="ttt" align="center">-28 </td>
+          </tr>
+                  <tr bgcolor="#FFFFFF">                                      
+          <td class="ttt" align="center">群益金鼎 </td>
+          <td class="ttt" align="center">29 </td>
+          <td class="ttt" align="center">7 </td>
+          <td class="ttt" align="center">+22 </td>
+          <td class="ttt" align="center">富邦-民生 </td>
+          <td class="ttt" align="center">1 </td>
+          <td class="ttt" align="center">28 </td>
+          <td class="ttt" align="center">-27 </td>
+          </tr>
+                  <tr bgcolor="#FFFFFF">                                      
+          <td class="ttt" align="center">合庫證券 </td>
+          <td class="ttt" align="center">16 </td>
+          <td class="ttt" align="center">0 </td>
+          <td class="ttt" align="center">+16 </td>
+          <td class="ttt" align="center">玉山證券 </td>
+          <td class="ttt" align="center">5 </td>
+          <td class="ttt" align="center">29 </td>
           <td class="ttt" align="center">-24 </td>
           </tr>
                   <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">中國信託-嘉義 </td>
-          <td class="ttt" align="center">21 </td>
-          <td class="ttt" align="center">2 </td>
-          <td class="ttt" align="center">+19 </td>
-          <td class="ttt" align="center">兆豐-中壢 </td>
+          <td class="ttt" align="center">兆豐-埔墘 </td>
+          <td class="ttt" align="center">15 </td>
+          <td class="ttt" align="center">1 </td>
+          <td class="ttt" align="center">+14 </td>
+          <td class="ttt" align="center">日盛-雙和 </td>
           <td class="ttt" align="center">1 </td>
           <td class="ttt" align="center">23 </td>
           <td class="ttt" align="center">-22 </td>
           </tr>
                   <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">元大-大益 </td>
+          <td class="ttt" align="center">永豐金-桃盛 </td>
           <td class="ttt" align="center">20 </td>
-          <td class="ttt" align="center">1 </td>
-          <td class="ttt" align="center">+19 </td>
-          <td class="ttt" align="center">香港上海匯豐 </td>
+          <td class="ttt" align="center">7 </td>
+          <td class="ttt" align="center">+13 </td>
+          <td class="ttt" align="center">大慶-富順 </td>
           <td class="ttt" align="center">0 </td>
           <td class="ttt" align="center">22 </td>
           <td class="ttt" align="center">-22 </td>
           </tr>
                   <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">元大-太平 </td>
-          <td class="ttt" align="center">19 </td>
+          <td class="ttt" align="center">宏遠證券 </td>
+          <td class="ttt" align="center">12 </td>
           <td class="ttt" align="center">0 </td>
-          <td class="ttt" align="center">+19 </td>
-          <td class="ttt" align="center">康和 </td>
-          <td class="ttt" align="center">5 </td>
-          <td class="ttt" align="center">26 </td>
-          <td class="ttt" align="center">-21 </td>
+          <td class="ttt" align="center">+12 </td>
+          <td class="ttt" align="center">群益金鼎-宜蘭 </td>
+          <td class="ttt" align="center">0 </td>
+          <td class="ttt" align="center">22 </td>
+          <td class="ttt" align="center">-22 </td>
           </tr>
                   <tr bgcolor="#FFFFFF">                                      
-          <td class="ttt" align="center">合庫證券 </td>
-          <td class="ttt" align="center">18 </td>
-          <td class="ttt" align="center">0 </td>
-          <td class="ttt" align="center">+18 </td>
-          <td class="ttt" align="center">群益金鼎-海山 </td>
+          <td class="ttt" align="center">富邦-新竹華信 </td>
+          <td class="ttt" align="center">28 </td>
+          <td class="ttt" align="center">16 </td>
+          <td class="ttt" align="center">+12 </td>
+          <td class="ttt" align="center">元大-南京 </td>
           <td class="ttt" align="center">2 </td>
-          <td class="ttt" align="center">21 </td>
-          <td class="ttt" align="center">-19 </td>
+          <td class="ttt" align="center">24 </td>
+          <td class="ttt" align="center">-22 </td>
+          </tr>
+                  <tr bgcolor="#FFFFFF">                                      
+          <td class="ttt" align="center">元大-文心興安 </td>
+          <td class="ttt" align="center">18 </td>
+          <td class="ttt" align="center">7 </td>
+          <td class="ttt" align="center">+11 </td>
+          <td class="ttt" align="center">國泰證券 </td>
+          <td class="ttt" align="center">41 </td>
+          <td class="ttt" align="center">62 </td>
+          <td class="ttt" align="center">-21 </td>
           </tr>
           </table>
     </td>
@@ -766,4 +758,4 @@ function stockmenu_submit (form)
 </html>
 
 
-<!-- w104.finance.tw1.yahoo.com Mon Mar  8 05:06:11 UTC 2021 -->
+<!-- w101.finance.tp2.yahoo.com Thu Mar  4 05:32:37 UTC 2021 -->

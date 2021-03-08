@@ -48,7 +48,8 @@ def collectdata(filename,sdate,stockid):
     dataFrame = pd.read_csv(filename,encoding='utf-8')
     
     #dataFrame1 = pd.read_csv("database.csv",encoding='utf-8')
-    dbname = stockid+"_database.csv"
+    #dbname = stockid+"_database.csv"
+    dbname = "db\\"+stockid+"_database.csv"
     major_frame = pd.read_csv(dbname,encoding='utf-8')
     rowcount = major_frame.shape[0]
     columncount = major_frame.shape[1]
@@ -78,6 +79,10 @@ def collectdata(filename,sdate,stockid):
             major_frame[dataFrame["賣超券商"][l]] = data1
         data1.clear()
 
+    rowcount = major_frame.shape[0]
+    columncount = major_frame.shape[1]
+    rowcount1 = dataFrame.shape[0]
+    columncount1 = dataFrame.shape[1]
 
     #新增brokerage完成後 要新增row
     newinfo = []
@@ -87,18 +92,22 @@ def collectdata(filename,sdate,stockid):
     #如此 新增的row 才會對齊欄位
     for r in range(1,columncount): 
         total =0
-        if  major_frame.columns[r] == '合庫證券 ':
-            total = 0
+
         for c in range(0,rowcount1):
+            #保留庫存
+            total = major_frame[major_frame.columns[r]][rowcount-1]
+            if major_frame.columns[r] == "元大證券 ":
+                total = major_frame[major_frame.columns[r]][rowcount-1]
+            
             if dataFrame["買超券商"][c] == major_frame.columns[r]:
                 newd1 = dataFrame["買超"][c] 
                 oldd1 = major_frame[dataFrame["買超券商"][c]][rowcount-1]
-                total = int(newd1) + int(oldd1)
+                total = int(oldd1) + int(newd1)
                 break
             elif dataFrame["賣超券商"][c] == major_frame.columns[r]:
                 newd1 = dataFrame["賣超"][c] 
                 oldd1 = major_frame[dataFrame["賣超券商"][c]][rowcount-1]
-                total = int(newd1) - int(oldd1)
+                total = int(oldd1) + int(newd1)
                 break
         newinfo.append(total)
     
