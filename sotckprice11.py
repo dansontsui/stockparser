@@ -229,7 +229,9 @@ print('TWSE count=',len(stockID))
 '''
 #download OTC
 #listOTC = downloadOTC1(downloadDate)
-listOTC=downloadOTC(downloadDate)
+for i in range(3,0,-1):
+    downloadDate= dt.date.today() - timedelta(days=i)
+    listOTC=downloadOTC(downloadDate)
 
 #get result
 
