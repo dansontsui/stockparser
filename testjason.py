@@ -65,21 +65,43 @@ def craete_history(sotckid,filedate):
 
 def test_jason_from_histock_file(stockid):
 
-    major_file_name = "major_ori_data\\major_hisstock_"+stockid+".html"
+    major_file_name = "histock_original_data\\major_hisstock_"+stockid+".html"
+
+    soup = BeautifulSoup(open(major_file_name,encoding="utf-8"), "html.parser")
+    b_tag= soup.find_all("div", class_="row-stock pl10")
+    b_tag1= soup.find_all("input",class_="inputDay")
+    s = b_tag1[0]
+    a = str(s)
+    sdate = re.search(r'value=\S+"',a).group().replace('value','').replace('/','').replace('=','').replace('"','')
+
+
     f = open(major_file_name, mode='r', encoding='utf-8')
     fs = f.read()
     f.close()
-    #res = requests.get(url) # your link here
-    soup = bs4.BeautifulSoup(fs)
-    my_list = [i.string.lstrip('q("talkPage.init", ').rstrip(')') for i in soup.select('script') if i.string and i.string.startswith('q')]
+    s = fs.find('"Buy":')
+    s1 = fs[s:].find(']')
+    newstring=fs[s:s+s1+1]
+    newstring =  newstring.replace('"Buy":','')
+    newstring = newstring.replace('\n','')
+    f1 = open("histock_original_data\\testjason_buy.txt",mode='w',encoding='utf-8')
+    f1.write(newstring)
+    f1.close()
+    df = pd.read_json(newstring)
 
-    # my_list should now be filled with all the json text that is from a <script> tag followed by a 'q'
-    # note that I lstrip and rstrip on the script based no your sample (assuming there's a closing bracket), but if the convention is different you'll need to update that accordingly.
 
-    #...#
-    my_jsons = []
-    for json_string in my_list:
-        my_jsons.append(json.loads(json_string))
+    s = fs.find('"Sell":')
+    s1 = fs[s:].find(']')
+    newstring=fs[s:s+s1+1]
+    newstring =  newstring.replace('"Sell":','')
+    newstring = newstring.replace('\n','')
+    f1 = open("histock_original_data\\testjason_sell.txt",mode='w',encoding='utf-8')
+    f1.write(newstring)
+    f1.close()
+    df1 = pd.read_json(newstring)
+    df = df.append(df1,ignore_index=True)
+    df.to_csv("histock_rebuild_data\\"+stockid+"_major.csv", encoding='utf-8',index=0) #update db
+
+   
 
 def startParser_form_histock(sotckid):
     #load data form internet
@@ -94,7 +116,7 @@ def startParser_form_histock(sotckid):
     #download otc all stock data
     get_sotck_price.downloadOTC(s2[0]+"/"+s2[1]+"/"+s2[2])
     '''
-    major_file_name = "major_ori_data\\major_hisstock_"+sotckid+".html"
+    major_file_name = "histock_original_data\\major_hisstock_"+sotckid+".html"
     f = open(major_file_name, mode='w', encoding='utf-8')
     f.write(r.text)
     f.close()
@@ -102,6 +124,7 @@ def startParser_form_histock(sotckid):
 
 def startParser(sotckid):
     #load data form internet
+    print("startParser")
     r = requests.get('https://tw.stock.yahoo.com/d/s/major_8299.html')
     #parser html date
     s = re.findall(r"資料日期\S+.+",r.text)
@@ -151,5 +174,5 @@ def startParser(sotckid):
     
 if __name__ == '__main__':
     #startParser_forhistock('8299')    
-    startParser('8299')
+    test_jason_from_histock_file('8299')
     
