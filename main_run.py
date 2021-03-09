@@ -8,7 +8,7 @@ import datetime
 import re
 import major_data
 import create_db
-
+import get_sotck_price
 
 
 def craete_history(sotckid,filedate):
@@ -64,6 +64,24 @@ def craete_history(sotckid,filedate):
 
 
 
+def startParser_forhistock(sotckid):
+    #load data form internet
+    r = requests.get('https://histock.tw/stock/branch.aspx?no=8299')
+    #parser html date
+    '''
+    s = re.findall(r"資料日期\S+.+",r.text)
+    s1 = re.search(r"\d+\s+/\d+ /\d+",s[0])
+    s2 = s1.group()
+    s2 = re.split(r" /",s2)
+    filedate = s2[0]+s2[1]+s2[2] 
+    #download otc all stock data
+    get_sotck_price.downloadOTC(s2[0]+"/"+s2[1]+"/"+s2[2])
+    '''
+    major_file_name = "major_ori_data\\major_hisstock_"+sotckid+".html"
+    f = open(major_file_name, mode='w', encoding='utf-8')
+    f.write(r.text)
+    f.close()
+
 def startParser(sotckid):
     #load data form internet
     r = requests.get('https://tw.stock.yahoo.com/d/s/major_8299.html')
@@ -73,6 +91,8 @@ def startParser(sotckid):
     s2 = s1.group()
     s2 = re.split(r" /",s2)
     filedate = s2[0]+s2[1]+s2[2] 
+    #download otc all stock data
+    get_sotck_price.downloadOTC(s2[0]+"/"+s2[1]+"/"+s2[2])
     major_file_name = "major_ori_data\\major_"+sotckid+"_"+filedate+".html"
     f = open(major_file_name, mode='w', encoding='utf-8')
     #save original data
@@ -109,6 +129,9 @@ def startParser(sotckid):
     dataFrame.to_csv("major_csv_data\\"+sotckid+"_"+filedate+'.csv', encoding='utf-8',index=0) 
     #add to dababase
     major_data.collectdata("major_csv_data\\"+sotckid+"_"+filedate+'.csv',filedate,sotckid)
+
+    
 if __name__ == '__main__':
+    #startParser_forhistock('8299')    
     startParser('8299')
     

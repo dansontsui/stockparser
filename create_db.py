@@ -6,6 +6,7 @@ import sys
 from bs4 import BeautifulSoup 
 import datetime
 import re
+import get_sotck_price
 #if db not exists
 
 def check_db_file_exist(stockid):
@@ -33,11 +34,26 @@ f.close()
 def create_data_base(dataFrame,sdate,stockid):
     if check_db_file_exist(stockid) == True:
         return 
+    s1 = sdate[0:3]+"/"+sdate[3:5]+"/"+sdate[5:7]
+    sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(sdate,stockid)
+    if sclose == 'ff':
+        sclose = 'ff'
     Brokerage = []
     data1=[]
     Brokerage.append('日期')
-    
     data1.append(sdate)
+    Brokerage.append('收盤')
+    data1.append(sclose)
+    Brokerage.append('漲跌')
+    data1.append(srage)
+    Brokerage.append('開盤')
+    data1.append(sopen)
+    Brokerage.append('最高')
+    data1.append(shigh)
+    Brokerage.append('最低')
+    data1.append(slow)
+
+    
     for l in range(len(dataFrame["買超券商"])):
         if len(Brokerage) == 0:
             Brokerage.append(dataFrame["買超券商"][l])

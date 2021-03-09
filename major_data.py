@@ -5,6 +5,7 @@ import os
 import sys 
 from bs4 import BeautifulSoup 
 import datetime
+import get_sotck_price
 
 '''
 date = '20180102'
@@ -42,6 +43,11 @@ sdate = asd[0]+asd[1]+asd[2] #get date
 
 
 def collectdata(filename,sdate,stockid):
+
+
+    sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(sdate,stockid)
+    if sclose == 'ff':
+        sclose = 'ff'
 
     list_header = [] 
     data = [] 
@@ -87,12 +93,16 @@ def collectdata(filename,sdate,stockid):
     #新增brokerage完成後 要新增row
     newinfo = []
     newinfo.append(sdate)
+    newinfo.append(sclose)
+    newinfo.append(srage)
+    newinfo.append(sopen)
+    newinfo.append(shigh)
+    newinfo.append(slow)
     #已major db為主要開始搜尋今日的資料是否有符合
     #要讓 newinfo的資料順序 對其 major db的欄位順序
     #如此 新增的row 才會對齊欄位
-    for r in range(1,columncount): 
+    for r in range(6,columncount): 
         total =0
-
         for c in range(0,rowcount1):
             #保留庫存
             total = major_frame[major_frame.columns[r]][rowcount-1]
@@ -111,7 +121,7 @@ def collectdata(filename,sdate,stockid):
                 break
         newinfo.append(total)
     
-    major_frame.loc[rowcount] = newinfo #add new row
+    major_frame.loc[rowcount+1] = newinfo #add new row
     major_frame.to_csv(dbname, encoding='utf-8',index=0) #update db
 
 #test 

@@ -134,8 +134,7 @@ def downloadOTCoriginaldate(date):
     f.close()
 
 def downloadOTC(date):
-    #sd = twdate(date)
-    sd = date
+    sd = twdate(date)
     print("get otc data [%s]" % sd)
     sd1=sd.split('/')
     sd2 = sd1[0] + sd1[1] + sd1[2]
@@ -160,11 +159,7 @@ def downloadOTC(date):
 def get_otc_history_from_file(sdate,stockid):
      filename = 'stock_rebuld_data\\'+sdate+"_otcstock.csv"
      df = pd.read_csv(filename,encoding='utf-8')
-     row  =  df.shape[0]
-     for r in range(1,row):
-         if df["代號"][r] == stockid:
-             return df["收盤 "][r], df["漲跌"][r], df["開盤 "][r],df["最高 "][r],df["最低"][r]
-     return 'ff','ff','ff','ff','ff'
+     return df
 
 def get_otc_history_from_internet():
     for i in range(20,0,-1):
