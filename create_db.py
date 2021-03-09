@@ -36,6 +36,7 @@ def create_data_base(dataFrame,sdate,stockid):
     Brokerage = []
     data1=[]
     Brokerage.append('日期')
+    
     data1.append(sdate)
     for l in range(len(dataFrame["買超券商"])):
         if len(Brokerage) == 0:

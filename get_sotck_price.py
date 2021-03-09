@@ -114,7 +114,7 @@ def internet_otc_to_csv(IOtext):
             end = 1
         if start==1 and end==0:
             line2 += line1
-    filename = sdate+"_otcstock.csv"
+    filename = 'stock_rebuld_data\\'+sdate+"_otcstock.csv"
     f = open(filename, mode='w', encoding='utf-8')
     f.write(line2)
     f.close()
@@ -135,45 +135,36 @@ def downloadOTCoriginaldate(date):
 
 def downloadOTC(date):
     sd = twdate(date)
+    print("get otc data [%s]" % sd)
     sd1=sd.split('/')
     sd2 = sd1[0] + sd1[1] + sd1[2]
     url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d='+sd+'&s=0,asc,0'
-          
+    print(url)
     r = requests.post(url)
 # 整理資料，變成表格
-    f = open(sd2+"_orginal_data.csv", mode='w', encoding='utf-8')
+    f = open('stock_original_data\\'+sd2+"_original_data.csv", mode='w', encoding='utf-8')
     sio = StringIO(r.text)
+    sioSize = sio.seek(0,2)
     f.write(sio.read())
     f.close()
+
+    if sioSize < 2048:
+        return 
     sio.seek(0)
     #sio = StringIO(r.text)
     fileName = internet_otc_to_csv(sio)
-    
-    df = pd.read_csv(fileName)
-    return 
-    df = pd.read_csv(r.text)
+    #df = pd.read_csv(fileName)
+    return fileName
 
-    # url='http://www.tpex.org.tw/web/stock/aftertrading/otc_quotes_no1430/stk_wn1430_print.php?l=zh-tw&d='+twdate(date)+'&se=EW'
+def get_otc_history_from_file(sdate,stockid):
+     filename = 'stock_rebuld_data\\'+sdate+"_otcstock.csv"
+     df = pd.read_csv(filename,encoding='utf-8')
+     return df
 
-    table = pd.read_html(url)[0]
-    rowCount = table.values.shape[0]-1
-    srcOTC = table.values[:rowCount].tolist()
-    #search stock list
-    firstIndex=0
-    lastIndex=0
-    for i in range(len(srcOTC)):
-        row = srcOTC[i]
-        if (row[0]=='1258'):  #1st stock ID
-            firstIndex=i
-        elif (row[0]=='9962'):  #lastest stock ID
-            lastIndex=i+1
-            break
-    #print('OTC index=',firstIndex,lastIndex)
-    listOTC = srcOTC[firstIndex:lastIndex]
-    resultOTC = [row[:2]+row[4:7]+row[2:3]+row[7:8] for row in listOTC]
-    #print(resultOTC[0])
-    return resultOTC
-
+def get_otc_history_from_internet():
+    for i in range(20,0,-1):
+        downloadDate= dt.date.today() - timedelta(days=i)
+        downloadOTC(downloadDate)
 
 
 def showStock(stockID, stockName, Open, High, Low, Close,Volume):
@@ -229,10 +220,11 @@ print('TWSE count=',len(stockID))
 '''
 #download OTC
 #listOTC = downloadOTC1(downloadDate)
-for i in range(3,0,-1):
+for i in range(20,0,-1):
     downloadDate= dt.date.today() - timedelta(days=i)
     listOTC=downloadOTC(downloadDate)
 
+'''
 #get result
 
 result = np.array(listOTC)
@@ -257,3 +249,4 @@ w.writerows([Title])
 w.writerows(listTWSE)   #TWSE list
 w.writerows(listOTC)    #OTC list
 f.close()
+'''

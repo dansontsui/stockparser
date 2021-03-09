@@ -168,6 +168,10 @@ DocProject/Help/html
 
 # Click-Once directory
 publish/
+major_csv_data/
+major_ori_data/
+stock_original_data/
+stock_rebuld_data/
 
 # Publish Web Output
 *.[Pp]ublish.xml
