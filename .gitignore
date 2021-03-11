@@ -173,6 +173,7 @@ major_ori_data/
 stock_original_data/
 stock_rebuld_data/
 histock_original_data/
+histock_rebuild_data/
 
 # Publish Web Output
 *.[Pp]ublish.xml

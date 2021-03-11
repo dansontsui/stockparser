@@ -6,37 +6,17 @@ from bs4 import BeautifulSoup
 import csv
 import re
 import datetime as dt
+import time
+import log
+import logging
 
-def parser_major_data_to_csv_data(filename,sdate):
+def parser_major_data_to_csv_data(filename,mainid,subid,sdate):
     soup = BeautifulSoup(open(filename,encoding="utf-8"), "html.parser")
     #header = soup.find_all("table")[3].find("tr")[1:]
     #header = soup.find_all("td",{"class":"t2"})
     #header = soup.find_all("table",{"class":"t0"}).find('tr')
 
     columns1 =[]
-    '''
-    for a in soup.find_all('td', {'class': 't4t1'}):
-        s = a.find('script')
-        if s == None:
-            s1=(a.text.replace('\n',''))
-            columns.append(s1)
-        else:
-            stocks=(str(s.contents).replace('\n','').replace('\\n','').replace('\\tGenLink2stk','')
-            .replace('<!--(','').replace(');//-->','').replace('\'','').replace('"','').replace('[','').replace(']',''))
-            s1 = stocks.replace(',')
-            columns.append(s1)
-    '''
-    #columns = [th.text.replace('\n', '') for th in soup.find_all('td', {'class': 't4t1'})]
-
-
-
-    a = soup.find_all('td', {'class': 't4t1'})
-    b = soup.find_all('td', {'class': 't3n1'})
-    #soup = BeautifulSoup(data)
-    #script = soup.find_all('script')
-    #for jj in script:
-    #    print(jj.text)
-
     table = soup.find_all('table', {'class': 't0'})
     #for tableindex in range(0,2):
     aa = table[0].find_all('tr')
@@ -67,7 +47,6 @@ def parser_major_data_to_csv_data(filename,sdate):
                     print(s1)
                     data.append(s1)
                 else:
-                    #data.append(c.text)
                     stocks1=str(c.contents[1])
                     stocks1 = re.search(r'\(\S+\)',stocks1).group()
                     stocks1 = stocks1.replace('(','').replace('\'','').replace(')','').replace(',','')
@@ -78,12 +57,18 @@ def parser_major_data_to_csv_data(filename,sdate):
                     data.clear()
 
     dataFrame = pd.DataFrame(data = dataarr, columns = columns1)
-    dataFrame.to_csv("histock_rebuild_data\\"+sdate+"_rebuid.csv",encoding='utf-8',index=0)
+    dataFrame.to_csv("histock_rebuild_data\\"+mainid+'_'+subid+'_'+sdate+"_rebuid.csv",encoding='utf-8',index=0)
     print(dataFrame.head())
 
-def save_oridata_form_fubon(sotckid,sdate):
+def save_oridata_form_fubon(mainid,subid,sdate):
     #load data form internet
-    r = requests.get('https://fubon-ebrokerdj.fbs.com.tw/z/zg/zgb/zgb0.djhtm?a=9800&b=9813&c=E&e='+sdate+'&f='+sdate)
+    headers = {
+        'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',
+        'Cookie':'gr_user_id=1f9ea7ea-462a-4a6f-9d55-156631fc6d45; bid=vPYpmmD30-k; ll="118282"; ue="codin; __utmz=30149280.1499577720.27.14.utmcsr=douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/doulist/240962/; __utmv=30149280.3049; _vwo_uuid_v2=F04099A9dd; viewed="27607246_26356432"; ap=1; ps=y; push_noty_num=0; push_doumail_num=0; dbcl2="30496987:gZxPfTZW4y0"; ck=13ey; _pk_ref.100001.8cb4=%5B%22%22%2C%22%22%2C1515153574%2C%22https%3A%2F%2Fbook.douban.com%2Fmine%22%5D; __utma=30149280.833870293.1473539740.1514800523.1515153574.50; __utmc=30149280; _pk_id.100001.8cb4=255d8377ad92c57e.1473520329.20.1515153606.1514628010.'
+    }
+
+    url = 'https://fubon-ebrokerdj.fbs.com.tw/z/zg/zgb/zgb0.djhtm?a='+mainid+'&b='+subid+'&c=E&e='+sdate+'&f='+sdate
+    r = requests.get(url,headers = headers)
     #parser html date
     '''
     s = re.findall(r"資料日期\S+.+",r.text)
@@ -94,20 +79,82 @@ def save_oridata_form_fubon(sotckid,sdate):
     #download otc all stock data
     get_sotck_price.downloadOTC(s2[0]+"/"+s2[1]+"/"+s2[2])
     '''
-    major_file_name = 'histock_original_data\major_fubon_'+sdate+'.html'
+    major_file_name = 'histock_original_data\\'+mainid+'_'+subid+'_major_fubon_'+sdate+'.html'
     f = open(major_file_name, mode='w', encoding='utf-8')
     f.write(r.text)
     f.close()
     return major_file_name
 
+def load_broker_id_from_csv():
+    #pd.read_csv处理空格和tab分割符问题
+    df=pd.read_csv('broker_id.csv',encoding='utf-8',sep='\\s+')
+    return df
+
+#03-11 18:21:13 - Log.Parser - INFO 
+
+logger = logging.getLogger('Log.Parser')
+logger.setLevel(logging.DEBUG)
+#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s',datefmt='%m-%d %H:%M:%S')
+formatter = logging.Formatter('%(asctime)s - %(message)s',datefmt='%m-%d %H:%M:%S')
+fh1 = logging.FileHandler(filename="test.py.log", mode='a')
+console = logging.StreamHandler()
+console.setFormatter(formatter)
+console.setLevel(logging.INFO)
+fh1.setLevel(logging.DEBUG)
+fh1.setFormatter(formatter)
+logger.addHandler(console)
+logger.addHandler(fh1)
+log.log("start")
+
+
+df = pd.DataFrame
+df = load_broker_id_from_csv()
 downloadDate= dt.date.today()
 year  = downloadDate.year
 month = downloadDate.month
 day   = downloadDate.day-1
 twday = '{}-{:1}-{:1}'.format(year,month,day)
 
+row = df.shape[0]
+col = df.shape[1]
+a = str(df.代號[0])
 
-#https://fubon-ebrokerdj.fbs.com.tw/z/zg/zgb/zgb0.djhtm?a=9800&b=9813&c=E&e=2021-3-9&f=2021-3-9
-filename = save_oridata_form_fubon('8299',twday)
-parser_major_data_to_csv_data(filename,twday)
+pattern = re.compile("[A-Za-z]+")
+# if found match (entire string matches pattern)
+#a = str(df.代號[r])
+mainBrok = ''
+subBrok = ''
+mainBrokName = ''
+for r in range(0,row):
+    if df.代號[r][3]=='0':
+        mainBrok = df.代號[r]
+        subBrok = df.代號[r]
+        mainBrokName = df.證券商名稱[r]
+        log.log('...main-id:'+mainBrok+'-'+subBrok+'--------')
+    elif df.證券商名稱[r].find(mainBrokName) >=0:
+        subBrok = df.代號[r]
+        brokage_id_utf8 = subBrok.encode("UTF-8")
+        if pattern.fullmatch(df.代號[r][3]) is not None:
+            subBrok = '00'+str(hex(brokage_id_utf8[0]))+'00'+str(hex(brokage_id_utf8[1]))+'00'+str(hex(brokage_id_utf8[2]))+'00'+str(hex(brokage_id_utf8[3]))
+            subBrok =subBrok.replace('0x','')
+            log.log(subBrok)
+        else:
+            log.log('>>>>>>>>>>>>>>>sub-id:'+subBrok+'---------')
+    time.sleep(6)
+    try:
+        filename = save_oridata_form_fubon(mainBrok,subBrok,twday)
+        parser_major_data_to_csv_data(filename,mainBrok,subBrok,twday)
+    except:
+        log.log("exception"+filename+','+mainBrok +","+subBrok+","+twday)
+
+
+
+    '''brokage_id_utf8 = a.encode("UTF-8")
+    if pattern.fullmatch(df.代號[r][3]) is not None:
+        print("Found match: " + df.代號[r])
+    else:
+        # if not found match
+        print("No match")'''
+
+
 #https://fubon-ebrokerdj.fbs.com.tw/z/zg/zgb/zgb0.djhtm?a=9800&b=0039003800310042
