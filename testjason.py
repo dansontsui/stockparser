@@ -63,9 +63,10 @@ def craete_history(sotckid,filedate):
     major_data.collectdata("major_csv_data\\"+sotckid+"_"+filedate+'.csv',filedate,sotckid)
 
 
-def test_jason_from_histock_file(stockid):
+def test_jason_and_rebuild_csv_from_histock_file(stockid,sdate):
 
-    major_file_name = "histock_original_data\\major_hisstock_"+stockid+".html"
+    major_file_name = "histock_original_data\\"+sdate+"_major_hisstock_"+stockid+".html"
+    #major_file_name = "histock_original_data\\"+sdate+"_major_hisstock_"+stockid+".html"
 
     soup = BeautifulSoup(open(major_file_name,encoding="utf-8"), "html.parser")
     b_tag= soup.find_all("div", class_="row-stock pl10")
@@ -83,7 +84,7 @@ def test_jason_from_histock_file(stockid):
     newstring=fs[s:s+s1+1]
     newstring =  newstring.replace('"Buy":','')
     newstring = newstring.replace('\n','')
-    f1 = open("histock_original_data\\testjason_buy.txt",mode='w',encoding='utf-8')
+    f1 = open("histock_original_data\\"+sdate+"_major.csv",mode='w',encoding='utf-8')
     f1.write(newstring)
     f1.close()
     df = pd.read_json(newstring)
@@ -101,11 +102,11 @@ def test_jason_from_histock_file(stockid):
     df = df.append(df1,ignore_index=True)
     df.to_csv("histock_rebuild_data\\"+stockid+"_major.csv", encoding='utf-8',index=0) #update db
 
-   
 
-def startParser_form_histock(sotckid):
+
+def save_oridata_form_histock(sotckid,sdate):
     #load data form internet
-    r = requests.get('https://histock.tw/stock/branch.aspx?no=8299')
+    r = requests.get('https://histock.tw/stock/branch.aspx?no='+sotckid+'&from='+sdate+'&to='+sdate)
     #parser html date
     '''
     s = re.findall(r"資料日期\S+.+",r.text)
@@ -116,7 +117,7 @@ def startParser_form_histock(sotckid):
     #download otc all stock data
     get_sotck_price.downloadOTC(s2[0]+"/"+s2[1]+"/"+s2[2])
     '''
-    major_file_name = "histock_original_data\\major_hisstock_"+sotckid+".html"
+    major_file_name = "histock_original_data\\"+sdate+"_major_hisstock_"+sotckid+".html"
     f = open(major_file_name, mode='w', encoding='utf-8')
     f.write(r.text)
     f.close()
@@ -173,6 +174,11 @@ def startParser(sotckid):
 
     
 if __name__ == '__main__':
-    #startParser_forhistock('8299')    
-    test_jason_from_histock_file('8299')
+    for j in range(1,31):
+        sdate = "202103{:02d}".format(j)
+        save_oridata_form_histock('8299',sdate)
+        try:
+            test_jason_and_rebuild_csv_from_histock_file('8299',sdate)
+        except:
+            print("load except_"+sdate)            
     
