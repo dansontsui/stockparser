@@ -9,8 +9,9 @@ import datetime as dt
 import time
 import log
 import logging
+import os
 
-def parser_major_data_to_csv_data(filename,mainid,subid,sdate):
+def parser_major_data_to_csv_data(folder_twday,filename,mainid,subid,sdate):
     soup = BeautifulSoup(open(filename,encoding="utf-8"), "html.parser")
     #header = soup.find_all("table")[3].find("tr")[1:]
     #header = soup.find_all("td",{"class":"t2"})
@@ -23,13 +24,13 @@ def parser_major_data_to_csv_data(filename,mainid,subid,sdate):
     sartrecordcoulumnName = 0
     for tt in aa:
         aa1 = tt.find_all('td')
-        print(aa1[0].text)
+        #print(aa1[0].text)
         if aa1[0].text == '買超':
             sartrecordcoulumnName = 1
             continue
         if sartrecordcoulumnName:
             for i in range(0,4):
-                print(aa1[i].text)
+                #print(aa1[i].text)
                 columns1.append(aa1[i].text)
             sartrecordcoulumnName = 0
 
@@ -44,23 +45,23 @@ def parser_major_data_to_csv_data(filename,mainid,subid,sdate):
                 s = c.find('script')
                 if s == None :
                     s1=(c.text.replace('\n',''))
-                    print(s1)
+                    #print(s1)
                     data.append(s1)
                 else:
                     stocks1=str(c.contents[1])
                     stocks1 = re.search(r'\(\S+\)',stocks1).group()
                     stocks1 = stocks1.replace('(','').replace('\'','').replace(')','').replace(',','')
-                    print(stocks1)
+                    #print(stocks1)
                     data.append(stocks1)
                 if len(data) == 4:
                     dataarr.append(data.copy())
                     data.clear()
 
     dataFrame = pd.DataFrame(data = dataarr, columns = columns1)
-    dataFrame.to_csv("histock_rebuild_data\\"+mainid+'_'+subid+'_'+sdate+"_rebuid.csv",encoding='utf-8',index=0)
+    dataFrame.to_csv("histock_rebuild_data\\"+folder_twday+"\\"+mainid+'_'+subid+'_'+sdate+"_rebuid.csv",encoding='utf-8',index=0)
     print(dataFrame.head())
 
-def save_oridata_form_fubon(mainid,subid,sdate):
+def save_oridata_form_fubon(folder_twday,mainid,subid,sdate):
     #load data form internet
     headers = {
         'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',
@@ -79,7 +80,7 @@ def save_oridata_form_fubon(mainid,subid,sdate):
     #download otc all stock data
     get_sotck_price.downloadOTC(s2[0]+"/"+s2[1]+"/"+s2[2])
     '''
-    major_file_name = 'histock_original_data\\'+mainid+'_'+subid+'_major_fubon_'+sdate+'.html'
+    major_file_name = 'histock_original_data\\'+folder_twday+"\\"+mainid+'_'+subid+'_major_fubon_'+sdate+'.html'
     f = open(major_file_name, mode='w', encoding='utf-8')
     f.write(r.text)
     f.close()
@@ -114,10 +115,26 @@ year  = downloadDate.year
 month = downloadDate.month
 day   = downloadDate.day-1
 twday = '{}-{:1}-{:1}'.format(year,month,day)
-
+folder_twday= '{}{:02}{:02}'.format(year,month,day)
 row = df.shape[0]
 col = df.shape[1]
 a = str(df.代號[0])
+
+#craete folder
+
+try:
+    os.mkdir('histock_original_data\\'+folder_twday)
+except OSError:
+    print ("Creation of the directory %s failed" % folder_twday)
+else:
+    print ("Successfully created the directory %s " % folder_twday)
+
+try:
+    os.mkdir("histock_rebuild_data\\"+folder_twday)
+except OSError:
+    print ("Creation of the directory %s failed" % folder_twday)
+else:
+    print ("Successfully created the directory %s " % folder_twday)
 
 pattern = re.compile("[A-Za-z]+")
 # if found match (entire string matches pattern)
@@ -142,10 +159,10 @@ for r in range(0,row):
             log.log('>>>>>>>>>>>>>>>sub-id:'+subBrok+'---------')
     time.sleep(6)
     try:
-        filename = save_oridata_form_fubon(mainBrok,subBrok,twday)
-        parser_major_data_to_csv_data(filename,mainBrok,subBrok,twday)
+        filename = save_oridata_form_fubon(folder_twday,mainBrok,subBrok,twday)
+        parser_major_data_to_csv_data(folder_twday,filename,mainBrok,subBrok,twday)
     except:
-        log.log("exception"+filename+','+mainBrok +","+subBrok+","+twday)
+        log.log("exception"+','+folder_twday+','+filename+','+mainBrok +","+subBrok+","+twday)
 
 
 
