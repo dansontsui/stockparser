@@ -11,7 +11,7 @@ import log
 import logging
 import os
 
-def parser_major_data_to_csv_data(folder_twday,filename,mainid,subid,sdate):
+def parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainid,subid,sdate):
     soup = BeautifulSoup(open(filename,encoding="utf-8"), "html.parser")
     #header = soup.find_all("table")[3].find("tr")[1:]
     #header = soup.find_all("td",{"class":"t2"})
@@ -58,10 +58,10 @@ def parser_major_data_to_csv_data(folder_twday,filename,mainid,subid,sdate):
                     data.clear()
 
     dataFrame = pd.DataFrame(data = dataarr, columns = columns1)
-    dataFrame.to_csv("histock_rebuild_data\\"+folder_twday+"\\"+mainid+'_'+subid+'_'+sdate+"_rebuid.csv",encoding='utf-8',index=0)
+    dataFrame.to_csv("histock_rebuild_data\\"+folder_twday+"\\"+findBrokName+'_'+mainid+'_'+subid+'_'+sdate+"_rebuid.csv",encoding='utf-8',index=0)
     print(dataFrame.head())
 
-def save_oridata_form_fubon(folder_twday,mainid,subid,sdate):
+def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate):
     #load data form internet
     headers = {
         'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',
@@ -80,7 +80,7 @@ def save_oridata_form_fubon(folder_twday,mainid,subid,sdate):
     #download otc all stock data
     get_sotck_price.downloadOTC(s2[0]+"/"+s2[1]+"/"+s2[2])
     '''
-    major_file_name = 'histock_original_data\\'+folder_twday+"\\"+mainid+'_'+subid+'_major_fubon_'+sdate+'.html'
+    major_file_name = 'histock_original_data\\'+folder_twday+"\\"+findBrokName+'_'+mainid+'_'+subid+'_major_fubon_'+sdate+'.html'
     f = open(major_file_name, mode='w', encoding='utf-8')
     f.write(r.text)
     f.close()
@@ -142,25 +142,28 @@ pattern = re.compile("[A-Za-z]+")
 mainBrok = ''
 subBrok = ''
 mainBrokName = ''
+findBrokName = ''
 for r in range(0,row):
     if df.代號[r][3]=='0':
         mainBrok = df.代號[r]
         subBrok = df.代號[r]
-        mainBrokName = df.證券商名稱[r]
-        log.log('...main-id:'+mainBrok+'-'+subBrok+'--------')
+        findBrokName = mainBrokName = df.證券商名稱[r]
+        log.log('...main-id:'+mainBrok+'-'+subBrok)
     elif df.證券商名稱[r].find(mainBrokName) >=0:
         subBrok = df.代號[r]
+        findBrokName = df.證券商名稱[r]
         brokage_id_utf8 = subBrok.encode("UTF-8")
         if pattern.fullmatch(df.代號[r][3]) is not None:
             subBrok = '00'+str(hex(brokage_id_utf8[0]))+'00'+str(hex(brokage_id_utf8[1]))+'00'+str(hex(brokage_id_utf8[2]))+'00'+str(hex(brokage_id_utf8[3]))
             subBrok =subBrok.replace('0x','')
             log.log(subBrok)
         else:
-            log.log('>>>>>>>>>>>>>>>sub-id:'+subBrok+'---------')
-    time.sleep(6)
-    try:
-        filename = save_oridata_form_fubon(folder_twday,mainBrok,subBrok,twday)
-        parser_major_data_to_csv_data(folder_twday,filename,mainBrok,subBrok,twday)
+            log.log('.....sub-id:'+subBrok)
+    try:            
+        log.log('.....name  :'+findBrokName)            
+        time.sleep(6)
+        filename = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
+        parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainBrok,subBrok,twday)
     except:
         log.log("exception"+','+folder_twday+','+filename+','+mainBrok +","+subBrok+","+twday)
 
