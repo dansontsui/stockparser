@@ -58,7 +58,7 @@ def parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainid,subi
                     data.clear()
 
     dataFrame = pd.DataFrame(data = dataarr, columns = columns1)
-    dataFrame.to_csv("histock_rebuild_data\\"+folder_twday+"\\"+findBrokName+'_'+mainid+'_'+subid+'_'+sdate+"_rebuid.csv",encoding='utf-8',index=0)
+    dataFrame.to_csv("histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_'+sdate+"_rebuid.csv",encoding='utf-8',index=0)
     print(dataFrame.head())
 
 def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate):
@@ -80,7 +80,7 @@ def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate):
     #download otc all stock data
     get_sotck_price.downloadOTC(s2[0]+"/"+s2[1]+"/"+s2[2])
     '''
-    major_file_name = 'histock_original_data\\'+folder_twday+"\\"+findBrokName+'_'+mainid+'_'+subid+'_major_fubon_'+sdate+'.html'
+    major_file_name = 'histock_original_data/'+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_major_fubon_'+sdate+'.html'
     f = open(major_file_name, mode='w', encoding='utf-8')
     f.write(r.text)
     f.close()
@@ -123,14 +123,14 @@ a = str(df.代號[0])
 #craete folder
 
 try:
-    os.mkdir('histock_original_data\\'+folder_twday)
+    os.makedirs('histock_original_data/'+folder_twday)
 except OSError:
     print ("Creation of the directory %s failed" % folder_twday)
 else:
     print ("Successfully created the directory %s " % folder_twday)
 
 try:
-    os.mkdir("histock_rebuild_data\\"+folder_twday)
+    os.makedirs("histock_rebuild_data/"+folder_twday)
 except OSError:
     print ("Creation of the directory %s failed" % folder_twday)
 else:
@@ -161,7 +161,7 @@ for r in range(0,row):
             log.log('.....sub-id:'+subBrok)
     try:            
         log.log('.....name  :'+findBrokName)            
-        time.sleep(6)
+        time.sleep(1)
         filename = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
         parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainBrok,subBrok,twday)
     except:

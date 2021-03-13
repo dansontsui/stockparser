@@ -101,7 +101,7 @@ def fubon_create_database(rebuild_csv_filename,brokagename,dbname,sdate):
 
 
 def trans_data_to_db(foldername,rebuild_csv_filename,sdate):
-    filename = foldername+'\\'+rebuild_csv_filename
+    filename = foldername+'/'+rebuild_csv_filename
     borkDataFrame = pd.read_csv(filename,encoding='utf-8')
     brokagename = rebuild_csv_filename.split('_')
     rowcount = borkDataFrame.shape[0]
@@ -112,7 +112,7 @@ def trans_data_to_db(foldername,rebuild_csv_filename,sdate):
         sid = re.search(r'[A-Za-z0-9]+',s).group()
         sname = re.search(r'[^A-Za-z0-9]+',s).group()
         print(sid +" " + sname)
-        dbname = 'db\\'+sid +"_"+sname+"_db.csv"
+        dbname = 'db/'+sid +"_"+sname+"_db.csv"
         if check_db_file_exist(dbname) == False: #file not exist
             fubon_create_database(filename,brokagename[0],dbname,sdate)
         else:
@@ -164,7 +164,7 @@ if __name__ == '__main__':
     
 
     pattern = re.compile("[A-Za-z]+")
-    path = 'histock_rebuild_data\\'+folder_twday
+    path = 'histock_rebuild_data/'+folder_twday
     for dirpath, dirnames, files in os.walk(os.path.abspath(path)):
         if dirpath.find('_NoTest') != -1:
             continue
