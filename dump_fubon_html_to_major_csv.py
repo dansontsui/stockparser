@@ -157,12 +157,14 @@ for dc in range(4,0,-1):
     mainBrokName = ''
     findBrokName = ''
     for r in range(0,row):
-        if df.代號[r][3]=='0':
+        if df.代號[r][3]=='0' and (df.代號[r][2]>='0' and df.代號[r][2]<='9'):
             mainBrok = df.代號[r]
             subBrok = df.代號[r]
             findBrokName = mainBrokName = df.證券商名稱[r]
             log.log('...main-id:'+mainBrok+'-'+subBrok)
-        elif df.證券商名稱[r].find(mainBrokName) >=0:
+        #elif df.證券商名稱[r].find(mainBrokName) >=0:
+        elif mainBrok.find(df.代號[r][:2]) >=0:
+            s = df.證券商名稱[r]
             subBrok = df.代號[r]
             findBrokName = df.證券商名稱[r]
             brokage_id_utf8 = subBrok.encode("UTF-8")
@@ -172,6 +174,8 @@ for dc in range(4,0,-1):
                 log.log(subBrok)
             else:
                 log.log('.....sub-id:'+subBrok)
+        else:
+            log.log('assert no found '+df.代號[r]+' '+df.證券商名稱[r])
         try:            
             log.log('.....name  :'+findBrokName)            
             time.sleep(1)
