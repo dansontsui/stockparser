@@ -130,7 +130,9 @@ pattern = re.compile("[A-Za-z]+")
 
 # if found match (entire string matches pattern)
 #a = str(df.代號[r])
-for dc in range(5,0,-1):
+for dc in range(4,0,-1):
+    to0 = time.time()
+
     day   = downloadDate.day-dc
     twday = '{}-{:1}-{:1}'.format(year,month,day)
     folder_twday= '{}{:02}{:02}'.format(year,month,day)
@@ -172,11 +174,15 @@ for dc in range(5,0,-1):
                 log.log('.....sub-id:'+subBrok)
         try:            
             log.log('.....name  :'+findBrokName)            
-            time.sleep(6)
+            time.sleep(1)
             filename = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
             parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainBrok,subBrok,twday)
         except:
             log.log("exception"+','+folder_twday+','+filename+','+mainBrok +","+subBrok+","+twday)
+    to1 = time.time() - to0
+    #print("get time = " + str(to1))
+    log.log('get time'+str(to1))
+    log.log(str(to1))
     Build_fubon_data_to_my_db.run_parser(folder_twday)
 
 
