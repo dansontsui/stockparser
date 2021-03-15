@@ -27,19 +27,62 @@ def check_db_file_exist(filename):
     else:
         print("檔案不存在。")
         return False
-def fubon_appen_data_to_database(brokagename,count,dbname,sdate):
+def fubon_append_data_to_database(brokagename,count,dbname,sdate):
     
     #dataFrame = pd.read_csv(rebuild_csv_filename,encoding='utf-8')
     db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
-    if brokagename in db_dataFrame.columns:
-        return
-    else:
-        dbrow = db_dataFrame.shape[0]
-        dbcol = db_dataFrame.shape[1]
-        oriCount = db_dataFrame[brokagename][dbrow]
+    colindex = -1
+    if brokagename not in db_dataFrame.columns:
+        return False
+
+    for index,row in db_dataFrame.iterrows():
+        if str(row['日期']) == sdate:
+            if row[brokagename] == 0:
+                if db_dataFrame.shape[0] ==1:
+                    row[brokagename] = count
+                else:
+                    row[brokagename] = int(db_dataFrame[brokagename][index-1])  + int(count)
+                db_dataFrame.to_csv(dbname,encoding='utf-8',index=0)
+            break
+    
         
     return
-def fubon_create_database(rebuild_csv_filename,brokagename,dbname,sdate):
+
+
+def fubon_append_today_row(dbname,brokename,sdate):
+    db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
+    rowcount = db_dataFrame.shape[0]
+    columncount = db_dataFrame.shape[1]
+    appendrow = 1
+    appendcolumn =1
+    if brokename in db_dataFrame.columns:
+        appendcolumn = 0
+    for index,row in db_dataFrame.iterrows():
+        if str(row['日期']) == sdate:
+            appendrow = 0
+
+    datarow = []
+    if appendcolumn == 1:
+        for c in range(0,rowcount):
+            datarow.append(0)
+        db_dataFrame[brokename] = datarow
+    columncount = db_dataFrame.shape[1]
+    if appendrow == 1:
+        #appen row
+        data1 = []
+        dataarr = []
+        data1.append(sdate)
+
+        for c in range(1,columncount):
+            data1.append(0)
+        dataarr.append(data1)
+        df1 = pd.DataFrame(data = dataarr, columns=db_dataFrame.columns)
+        db_dataFrame.loc[rowcount] = data1
+        #db_dataFrame.append(df1, ignore_index=True)
+    if appendcolumn==1 or appendrow==1:
+        db_dataFrame.to_csv(dbname,encoding='utf-8',index=0)
+    return 
+def fubon_create_database(rebuild_csv_filename,brokagename,count,dbname,sdate):
 
     s1 = sdate[0:3]+"/"+sdate[3:5]+"/"+sdate[5:7]
     sclose=0
@@ -66,7 +109,7 @@ def fubon_create_database(rebuild_csv_filename,brokagename,dbname,sdate):
     data1.append(slow)
     dataFrame = pd.read_csv(rebuild_csv_filename,encoding='utf-8')
     Brokerage.append(brokagename)
-    data1.append(dataFrame["差額"][0])
+    data1.append(count)
 
     data2 = []
     data2.append(data1)
@@ -110,13 +153,22 @@ def trans_data_to_db(foldername,rebuild_csv_filename,sdate):
     for index,row in borkDataFrame.iterrows():
         s = row['券商名稱'] #stock name
         sid = re.search(r'[A-Za-z0-9]+',s).group()
-        sname = re.search(r'[^A-Za-z0-9]+',s).group()
+        try:
+            sname = re.search(r'[^A-Za-z0-9]+',s).group()
+        except:
+            sname = sid
+        sname = sname.replace('*','')
         print(sid +" " + sname)
         dbname = 'db/'+sid +"_"+sname+"_db.csv"
+        count = str(row['差額']).replace(',','')
+        if sid.find("AS8299") >=0:
+            dbname = dbname
         if check_db_file_exist(dbname) == False: #file not exist
-            fubon_create_database(filename,brokagename[0],dbname,sdate)
+            fubon_create_database(filename,brokagename[0],count,dbname,sdate)
         else:
-            fubon_appen_data_to_database(brokagename[0],row['差額'],dbname,sdate)
+            fubon_append_today_row(dbname,brokagename[0],sdate)
+            fubon_append_data_to_database(brokagename[0],count,dbname,sdate)
+            dbname = dbname
 
 
         
@@ -129,9 +181,9 @@ def trans_data_to_db(foldername,rebuild_csv_filename,sdate):
 
 
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
     #03-11 18:21:13 - Log.Parser - INFO 
-
+def run_parser(sdate):
     logger = logging.getLogger('Log.Parser')
     logger.setLevel(logging.DEBUG)
     #formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s',datefmt='%m-%d %H:%M:%S')
@@ -149,35 +201,46 @@ if __name__ == '__main__':
     downloadDate= dt.date.today()
     year  = downloadDate.year
     month = downloadDate.month
-    day   = downloadDate.day-1
-    twday = '{}-{:1}-{:1}'.format(year,month,day)
-    folder_twday= '{}{:02}{:02}'.format(year,month,day)
-
-    
-    try:
-        os.mkdir('db')
-    except OSError:
-        print ("Creation db of the directory %s failed" % folder_twday)
-    else:
-        print ("Successfully db created the directory %s " % folder_twday)
-
     
 
-    pattern = re.compile("[A-Za-z]+")
-    path = 'histock_rebuild_data/'+folder_twday
-    for dirpath, dirnames, files in os.walk(os.path.abspath(path)):
-        if dirpath.find('_NoTest') != -1:
-            continue
-        files.sort()
-        for _file in files:
-            fs = str(_file)
-            if fs.find("csv") <0:
-                continue
-            trans_data_to_db(dirpath,fs,folder_twday)
+    #folder_twday = "20210311"
+    
+
+
+    #for dc in range(1,0,-1):
+    for dc in range(1,0,-1):
+        #day   = downloadDate.day-dc
+        day   = downloadDate.day
+        twday = '{}-{:1}-{:1}'.format(year,month,day)
+        folder_twday= '{}{:02}{:02}'.format(year,month,day)
+        folder_twday = sdate
+        try:
+            os.mkdir('db')
+        except OSError:
+            print ("Creation db of the directory %s failed" % folder_twday)
+        else:
+            print ("Successfully db created the directory %s " % folder_twday)
+
+        try:
+            pattern = re.compile("[A-Za-z]+")
+            path = 'histock_rebuild_data/'+folder_twday
+            for dirpath, dirnames, files in os.walk(os.path.abspath(path)):
+                if dirpath.find('_NoTest') != -1:
+                    continue
+                files.sort()
+                for _file in files:
+                    if _file.find("土銀-玉里") >=0 :
+                        _file = _file
+                    fs = str(_file)
+                    if fs.find("csv") <0:
+                        continue
+                    trans_data_to_db(dirpath,fs,folder_twday)
+        except OSError:
+            print ("trans_data_to_db exception : "+fs)
 
 
 
 
     
-
+run_parser('20210310')
 

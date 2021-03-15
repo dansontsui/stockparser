@@ -10,6 +10,7 @@ import time
 import log
 import logging
 import os
+import Build_fubon_data_to_my_db
 
 def parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainid,subid,sdate):
     soup = BeautifulSoup(open(filename,encoding="utf-8"), "html.parser")
@@ -113,59 +114,70 @@ df = load_broker_id_from_csv()
 downloadDate= dt.date.today()
 year  = downloadDate.year
 month = downloadDate.month
-day   = downloadDate.day-1
+day   = downloadDate.day
 twday = '{}-{:1}-{:1}'.format(year,month,day)
 folder_twday= '{}{:02}{:02}'.format(year,month,day)
+#folder_twday = "2021-03-14"
 row = df.shape[0]
 col = df.shape[1]
 a = str(df.代號[0])
 
 #craete folder
 
-try:
-    os.makedirs('histock_original_data/'+folder_twday)
-except OSError:
-    print ("Creation of the directory %s failed" % folder_twday)
-else:
-    print ("Successfully created the directory %s " % folder_twday)
 
-try:
-    os.makedirs("histock_rebuild_data/"+folder_twday)
-except OSError:
-    print ("Creation of the directory %s failed" % folder_twday)
-else:
-    print ("Successfully created the directory %s " % folder_twday)
 
 pattern = re.compile("[A-Za-z]+")
+
 # if found match (entire string matches pattern)
 #a = str(df.代號[r])
-mainBrok = ''
-subBrok = ''
-mainBrokName = ''
-findBrokName = ''
-for r in range(0,row):
-    if df.代號[r][3]=='0':
-        mainBrok = df.代號[r]
-        subBrok = df.代號[r]
-        findBrokName = mainBrokName = df.證券商名稱[r]
-        log.log('...main-id:'+mainBrok+'-'+subBrok)
-    elif df.證券商名稱[r].find(mainBrokName) >=0:
-        subBrok = df.代號[r]
-        findBrokName = df.證券商名稱[r]
-        brokage_id_utf8 = subBrok.encode("UTF-8")
-        if pattern.fullmatch(df.代號[r][3]) is not None:
-            subBrok = '00'+str(hex(brokage_id_utf8[0]))+'00'+str(hex(brokage_id_utf8[1]))+'00'+str(hex(brokage_id_utf8[2]))+'00'+str(hex(brokage_id_utf8[3]))
-            subBrok =subBrok.replace('0x','')
-            log.log(subBrok)
-        else:
-            log.log('.....sub-id:'+subBrok)
-    try:            
-        log.log('.....name  :'+findBrokName)            
-        time.sleep(1)
-        filename = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
-        parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainBrok,subBrok,twday)
-    except:
-        log.log("exception"+','+folder_twday+','+filename+','+mainBrok +","+subBrok+","+twday)
+for dc in range(5,0,-1):
+    day   = downloadDate.day-dc
+    twday = '{}-{:1}-{:1}'.format(year,month,day)
+    folder_twday= '{}{:02}{:02}'.format(year,month,day)
+    #folder_twday = "2021-03-14"
+
+    try:
+        os.makedirs('histock_original_data/'+folder_twday)
+    except OSError:
+        print ("Creation of the directory %s failed" % folder_twday)
+    else:
+        print ("Successfully created the directory %s " % folder_twday)
+
+    try:
+        os.makedirs("histock_rebuild_data/"+folder_twday)
+    except OSError:
+        print ("Creation of the directory %s failed" % folder_twday)
+    else:
+        print ("Successfully created the directory %s " % folder_twday)
+
+    mainBrok = ''
+    subBrok = ''
+    mainBrokName = ''
+    findBrokName = ''
+    for r in range(0,row):
+        if df.代號[r][3]=='0':
+            mainBrok = df.代號[r]
+            subBrok = df.代號[r]
+            findBrokName = mainBrokName = df.證券商名稱[r]
+            log.log('...main-id:'+mainBrok+'-'+subBrok)
+        elif df.證券商名稱[r].find(mainBrokName) >=0:
+            subBrok = df.代號[r]
+            findBrokName = df.證券商名稱[r]
+            brokage_id_utf8 = subBrok.encode("UTF-8")
+            if pattern.fullmatch(df.代號[r][3]) is not None:
+                subBrok = '00'+str(hex(brokage_id_utf8[0]))+'00'+str(hex(brokage_id_utf8[1]))+'00'+str(hex(brokage_id_utf8[2]))+'00'+str(hex(brokage_id_utf8[3]))
+                subBrok =subBrok.replace('0x','')
+                log.log(subBrok)
+            else:
+                log.log('.....sub-id:'+subBrok)
+        try:            
+            log.log('.....name  :'+findBrokName)            
+            time.sleep(6)
+            filename = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
+            parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainBrok,subBrok,twday)
+        except:
+            log.log("exception"+','+folder_twday+','+filename+','+mainBrok +","+subBrok+","+twday)
+    Build_fubon_data_to_my_db.run_parser(folder_twday)
 
 
 
