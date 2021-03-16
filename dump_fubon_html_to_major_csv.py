@@ -60,10 +60,16 @@ def parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainid,subi
 
     dataFrame = pd.DataFrame(data = dataarr, columns = columns1)
     dataFrame.to_csv("histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_'+sdate+"_rebuid.csv",encoding='utf-8',index=0)
-    print(dataFrame.head())
+    #print(dataFrame.head())
 
 def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate):
     #load data form internet
+
+    major_file_name = 'histock_original_data/'+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_major_fubon_'+sdate+'.html'
+
+    if os.path.isfile(major_file_name):
+        return True,major_file_name
+
     headers = {
         'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',
         'Cookie':'gr_user_id=1f9ea7ea-462a-4a6f-9d55-156631fc6d45; bid=vPYpmmD30-k; ll="118282"; ue="codin; __utmz=30149280.1499577720.27.14.utmcsr=douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/doulist/240962/; __utmv=30149280.3049; _vwo_uuid_v2=F04099A9dd; viewed="27607246_26356432"; ap=1; ps=y; push_noty_num=0; push_doumail_num=0; dbcl2="30496987:gZxPfTZW4y0"; ck=13ey; _pk_ref.100001.8cb4=%5B%22%22%2C%22%22%2C1515153574%2C%22https%3A%2F%2Fbook.douban.com%2Fmine%22%5D; __utma=30149280.833870293.1473539740.1514800523.1515153574.50; __utmc=30149280; _pk_id.100001.8cb4=255d8377ad92c57e.1473520329.20.1515153606.1514628010.'
@@ -81,11 +87,11 @@ def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate):
     #download otc all stock data
     get_sotck_price.downloadOTC(s2[0]+"/"+s2[1]+"/"+s2[2])
     '''
-    major_file_name = 'histock_original_data/'+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_major_fubon_'+sdate+'.html'
+   
     f = open(major_file_name, mode='w', encoding='utf-8')
     f.write(r.text)
     f.close()
-    return major_file_name
+    return False,major_file_name
 
 def load_broker_id_from_csv():
     #pd.read_csv处理空格和tab分割符问题
@@ -130,13 +136,13 @@ pattern = re.compile("[A-Za-z]+")
 
 # if found match (entire string matches pattern)
 #a = str(df.代號[r])
-for dc in range(4,0,-1):
+for dc in range(6,-1,-1):
     to0 = time.time()
 
     day   = downloadDate.day-dc
     twday = '{}-{:1}-{:1}'.format(year,month,day)
     folder_twday= '{}{:02}{:02}'.format(year,month,day)
-    #folder_twday = "2021-03-14"
+    #folder_twday = "20210311"
 
     try:
         os.makedirs('histock_original_data/'+folder_twday)
@@ -157,6 +163,7 @@ for dc in range(4,0,-1):
     mainBrokName = ''
     findBrokName = ''
     for r in range(0,row):
+        print(folder_twday + ">> " + str(r) + "/" + str(row))
         if df.代號[r][3]=='0' and (df.代號[r][2]>='0' and df.代號[r][2]<='9'):
             mainBrok = df.代號[r]
             subBrok = df.代號[r]
@@ -178,9 +185,12 @@ for dc in range(4,0,-1):
             log.log('assert no found '+df.代號[r]+' '+df.證券商名稱[r])
         try:            
             log.log('.....name  :'+findBrokName)            
-            time.sleep(1)
-            filename = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
+            
+            res,filename = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
             parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainBrok,subBrok,twday)
+            if res == False:
+                log.log('downloaded from internet ' + mainBrok+ '-' +subBrok)
+                time.sleep(1)
         except:
             log.log("exception"+','+folder_twday+','+filename+','+mainBrok +","+subBrok+","+twday)
     to1 = time.time() - to0

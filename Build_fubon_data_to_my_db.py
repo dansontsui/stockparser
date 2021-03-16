@@ -14,43 +14,54 @@ import os
 
 def check_db_file_exist(filename):
     filepath = filename
-    foder = "db"
-    if os.path.isdir(foder):
-        print('dir exists')
-    else:
-        print('dir not exists')
+    #foder = "db"
+    #if os.path.isdir(foder):
+        #print('dir exists')
+    #else:
+        #print('dir not exists')
         #create folder
     # 檢查檔案是否存在
     if os.path.isfile(filepath):
-        print("檔案存在。")
+        #print("檔案存在。")
         return True
     else:
-        print("檔案不存在。")
+        #print("檔案不存在。")
         return False
-def fubon_append_data_to_database(brokagename,count,dbname,sdate):
+def fubon_append_data_to_database(brokagename,db_dataFrame,count,dbname,sdate):
     
     #dataFrame = pd.read_csv(rebuild_csv_filename,encoding='utf-8')
-    db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
+    #db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
     colindex = -1
     if brokagename not in db_dataFrame.columns:
         return False
-
+    r = db_dataFrame.shape[0]
+    if r >=1:
+        r = r
+    for idx in reversed(db_dataFrame.index):
+        #print(db_dataFrame['日期'][idx])
+        if str(db_dataFrame['日期'][idx]) == sdate:
+            #if row[brokagename] == 0:
+            if db_dataFrame.shape[0] ==1:
+                db_dataFrame[brokagename][idx] = count
+            else:
+                db_dataFrame[brokagename][idx]  = int(db_dataFrame[brokagename][idx-1])  + int(count)
+        break          
+    '''
     for index,row in db_dataFrame.iterrows():
         if str(row['日期']) == sdate:
-            if row[brokagename] == 0:
-                if db_dataFrame.shape[0] ==1:
-                    row[brokagename] = count
-                else:
-                    row[brokagename] = int(db_dataFrame[brokagename][index-1])  + int(count)
-                db_dataFrame.to_csv(dbname,encoding='utf-8',index=0)
+            #if row[brokagename] == 0:
+            if db_dataFrame.shape[0] ==1:
+                row[brokagename] = count
+            else:
+                row[brokagename] = int(db_dataFrame[brokagename][index-1])  + int(count)
             break
-    
-        
+    '''
+    db_dataFrame.to_csv(dbname,encoding='utf-8',index=0)
     return
 
 
-def fubon_append_today_row(dbname,brokename,sdate):
-    db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
+def fubon_append_today_row(db_dataFrame,dbname,brokename,sdate):
+    #db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
     rowcount = db_dataFrame.shape[0]
     columncount = db_dataFrame.shape[1]
     appendrow = 1
@@ -66,21 +77,23 @@ def fubon_append_today_row(dbname,brokename,sdate):
         for c in range(0,rowcount):
             datarow.append(0)
         db_dataFrame[brokename] = datarow
+        #print("add column")
     columncount = db_dataFrame.shape[1]
     if appendrow == 1:
         #appen row
         data1 = []
         dataarr = []
         data1.append(sdate)
-
+        tempr = db_dataFrame.loc[rowcount-1]
         for c in range(1,columncount):
-            data1.append(0)
-        dataarr.append(data1)
-        df1 = pd.DataFrame(data = dataarr, columns=db_dataFrame.columns)
+            data1.append(tempr[c])
+        #dataarr.append(data1)
+        #df1 = pd.DataFrame(data = dataarr, columns=db_dataFrame.columns)
         db_dataFrame.loc[rowcount] = data1
+        #print("add row")
         #db_dataFrame.append(df1, ignore_index=True)
-    if appendcolumn==1 or appendrow==1:
-        db_dataFrame.to_csv(dbname,encoding='utf-8',index=0)
+    #if appendcolumn==1 or appendrow==1:
+    #    db_dataFrame.to_csv(dbname,encoding='utf-8',index=0)
     return 
 def fubon_create_database(rebuild_csv_filename,brokagename,count,dbname,sdate):
 
@@ -158,17 +171,25 @@ def trans_data_to_db(foldername,rebuild_csv_filename,sdate):
         except:
             sname = sid
         sname = sname.replace('*','')
-        print(sid +" " + sname)
+        #print(sid +" " + sname)
         dbname = 'db/'+sid +"_"+sname+"_db.csv"
         count = str(row['差額']).replace(',','')
-        if sid.find("AS8299") >=0:
+        if sid.find("AS2014") >=0:
             dbname = dbname
         if check_db_file_exist(dbname) == False: #file not exist
             fubon_create_database(filename,brokagename[0],count,dbname,sdate)
         else:
-            fubon_append_today_row(dbname,brokagename[0],sdate)
-            fubon_append_data_to_database(brokagename[0],count,dbname,sdate)
-            dbname = dbname
+            db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
+            t1 = time.time()
+            fubon_append_today_row(db_dataFrame,dbname,brokagename[0],sdate)
+            t2 = time.time()-t1
+            #print("fubon_append_today_row time" + str(t2))
+            
+            t1 = time.time()
+            fubon_append_data_to_database(brokagename[0],db_dataFrame,count,dbname,sdate)
+            t2 = time.time()-t1
+            #print("fubon_append_data_to_database time" + str(t2))
+            del db_dataFrame
 
 
         
@@ -208,7 +229,7 @@ def run_parser(sdate):
 
 
     #for dc in range(1,0,-1):
-    for dc in range(1,0,-1):
+    for dc in range(1,-1,-1):
         #day   = downloadDate.day-dc
         day   = downloadDate.day
         twday = '{}-{:1}-{:1}'.format(year,month,day)
@@ -228,19 +249,27 @@ def run_parser(sdate):
                 if dirpath.find('_NoTest') != -1:
                     continue
                 files.sort()
+                fidx = 1
                 for _file in files:
+                    print("file "+ str(fidx)+"/"+str(len(files)) + ":" + _file)
+                    fidx+=1
                     if _file.find("土銀-玉里") >=0 :
                         _file = _file
                     fs = str(_file)
                     if fs.find("csv") <0:
                         continue
+                    t1 = time.time()
                     trans_data_to_db(dirpath,fs,folder_twday)
+                    t2 = time.time()-t1
+                    print("file spend time : " + str(t2))
         except OSError:
             print ("trans_data_to_db exception : "+fs)
 
 
 
 
-    
-#run_parser('20210310')
+t0 = time.time()
+run_parser('20210311')
+t1 = time.time() -t0
+print(str(t1))
 
