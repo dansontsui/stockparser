@@ -10,7 +10,7 @@ import major_data
 import create_db
 import get_sotck_price
 
-
+#http://fubon-ebrokerdj.fbs.com.tw/z/zc/zco/zco0/zco0.djhtm?a=8299&BHID=9800&b=9800
 def craete_history(sotckid,filedate):
     #load data form internet
     
