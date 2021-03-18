@@ -27,7 +27,7 @@ def check_db_file_exist(filename):
     else:
         #print("檔案不存在。")
         return False
-def fubon_append_data_to_database(brokagename,db_dataFrame,count,dbname,sdate):
+def fubon_append_data_to_database(brokagename,source_df,db_dataFrame,sdate):
     
     #dataFrame = pd.read_csv(rebuild_csv_filename,encoding='utf-8')
     #db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
@@ -42,9 +42,9 @@ def fubon_append_data_to_database(brokagename,db_dataFrame,count,dbname,sdate):
         if str(db_dataFrame['日期'][idx]) == sdate:
             #if row[brokagename] == 0:
             if db_dataFrame.shape[0] ==1:
-                db_dataFrame[brokagename][idx] = count
+                db_dataFrame[brokagename][idx] = int(source_df['買賣超(張)'][0])
             else:
-                db_dataFrame[brokagename][idx]  = int(db_dataFrame[brokagename][idx-1])  + int(count)
+                db_dataFrame[brokagename][idx]  = int(db_dataFrame[brokagename][idx-1])  + int(source_df['買賣超(張)'][0])
         break          
     '''
     for index,row in db_dataFrame.iterrows():
@@ -56,11 +56,11 @@ def fubon_append_data_to_database(brokagename,db_dataFrame,count,dbname,sdate):
                 row[brokagename] = int(db_dataFrame[brokagename][index-1])  + int(count)
             break
     '''
-    db_dataFrame.to_csv(dbname,encoding='utf-8',index=0)
+   
     return
 
 
-def fubon_append_today_row(db_dataFrame,dbname,brokename,sdate):
+def fubon_append_today_row(db_dataFrame,source_DF,brokename,sdate):
     #db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
     rowcount = db_dataFrame.shape[0]
     columncount = db_dataFrame.shape[1]
@@ -95,7 +95,7 @@ def fubon_append_today_row(db_dataFrame,dbname,brokename,sdate):
     #if appendcolumn==1 or appendrow==1:
     #    db_dataFrame.to_csv(dbname,encoding='utf-8',index=0)
     return 
-def fubon_create_database(rebuild_csv_filename,brokagename,count,dbname,sdate):
+def fubon_create_database(df ,brokagename,dbname,sdate):
 
     s1 = sdate[0:3]+"/"+sdate[3:5]+"/"+sdate[5:7]
     sclose=0
@@ -120,9 +120,9 @@ def fubon_create_database(rebuild_csv_filename,brokagename,count,dbname,sdate):
     data1.append(shigh)
     Brokerage.append('最低')
     data1.append(slow)
-    dataFrame = pd.read_csv(rebuild_csv_filename,encoding='utf-8')
+    #dataFrame = pd.read_csv(rebuild_csv_filename,encoding='utf-8')
     Brokerage.append(brokagename)
-    data1.append(count)
+    data1.append(df['買賣超(張)'][0])
 
     data2 = []
     data2.append(data1)
@@ -130,40 +130,17 @@ def fubon_create_database(rebuild_csv_filename,brokagename,count,dbname,sdate):
     dataFrame1 = pd.DataFrame(data = data2, columns = Brokerage)
     dataFrame1.to_csv(dbname, encoding='utf-8',index=0) 
 
-    '''
-    for l in range(len(dataFrame["買超券商"])):
-        if len(Brokerage) == 0:
-            Brokerage.append(dataFrame["買超券商"][l])
-            data1.append(dataFrame["買超"][l])
-        else:
-            findbrok = 0
-            if dataFrame["買超券商"][l] in Brokerage:
-                findbrok = 1
-            if findbrok == 0:
-                Brokerage.append(dataFrame["買超券商"][l])
-                data1.append(dataFrame["買超"][l])
-            findbrok = 0
-            if dataFrame["賣超券商"][l] in Brokerage:
-                findbrok = 1
-            if findbrok == 0:
-                Brokerage.append(dataFrame["賣超券商"][l])
-                data1.append(dataFrame["賣超"][l])            
+    return dataFrame1
+ 
 
-    data2 = []
-    data2.append(data1)
-    dataFrame1 = pd.DataFrame(data = data2, columns = Brokerage)
-    dataFrame1.to_csv('db\\'+stockid+'_database.csv', encoding='utf-8',index=0) 
-    '''
-
-
-def trans_data_to_db(foldername,rebuild_csv_filename,sdate):
-    filename = foldername+'/'+rebuild_csv_filename
-    borkDataFrame = pd.read_csv(filename,encoding='utf-8')
-    brokagename = rebuild_csv_filename.split('_')
-    rowcount = borkDataFrame.shape[0]
-    columncount = borkDataFrame.shape[1]
+def trans_data_to_db(dbDF,SourceDF,brokagename,stockid,sdate):
+   
+    rowcount = SourceDF.shape[0]
+    columncount = SourceDF.shape[1]
     pattern = re.compile("[A-Za-z]+")
-    for index,row in borkDataFrame.iterrows():
+    fubon_append_today_row(dbDF,SourceDF,brokagename,sdate)
+    fubon_append_data_to_database(brokagename,SourceDF,dbDF,sdate)
+    '''for index,row in df.iterrows():
         s = row['券商名稱'] #stock name
         sid = re.search(r'[A-Za-z0-9]+',s).group()
         try:
@@ -189,7 +166,7 @@ def trans_data_to_db(foldername,rebuild_csv_filename,sdate):
             fubon_append_data_to_database(brokagename[0],db_dataFrame,count,dbname,sdate)
             t2 = time.time()-t1
             #print("fubon_append_data_to_database time" + str(t2))
-            del db_dataFrame
+            del db_dataFrame'''
 
 
         
@@ -267,9 +244,9 @@ def run_parser(sdate):
 
 
 
-
+'''
 t0 = time.time()
 run_parser('20210311')
 t1 = time.time() -t0
 print(str(t1))
-
+'''
