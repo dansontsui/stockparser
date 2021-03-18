@@ -122,7 +122,7 @@ pattern = re.compile("[A-Za-z]+")
 
 # if found match (entire string matches pattern)
 #a = str(df.代號[r])
-for dc in range(6,-1,-1):
+for dc in range(16,-1,-1):
     to0 = time.time()
 
     day   = downloadDate.day-dc
@@ -195,9 +195,9 @@ for dc in range(6,-1,-1):
         except:
             DataFrameDb.to_csv(dbname,encoding='utf-8',index=0)
             log.log("exception"+','+folder_twday+','+filename+','+mainBrok +","+subBrok+","+twday)
-        to1 = time.time() - to0
-        log.log('test time'+str(to1))
-        DataFrameDb.to_csv(dbname,encoding='utf-8',index=0)
+    to1 = time.time() - to0
+    log.log('test time'+str(to1))
+    DataFrameDb.to_csv(dbname,encoding='utf-8',index=0)
 
 
     '''brokage_id_utf8 = a.encode("UTF-8")
