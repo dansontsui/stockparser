@@ -11,6 +11,7 @@ import log
 import logging
 import os
 import Build_fubon_data_to_my_db
+import get_sotck_price
 
 def parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainid,subid,sdate):
     soup = BeautifulSoup(open(filename,encoding="utf-8"), "html.parser")
@@ -122,14 +123,30 @@ pattern = re.compile("[A-Za-z]+")
 
 # if found match (entire string matches pattern)
 #a = str(df.代號[r])
-for dc in range(16,-1,-1):
+stockid = '8299'
+for dc in range(1,-1,-1):
     to0 = time.time()
-
     day   = downloadDate.day-dc
     twday = '{}-{:1}-{:1}'.format(year,month,day)
     dbDate = '{}-{:02}-{:02}'.format(year,month,day)
     folder_twday= '{}{:02}{:02}'.format(year,month,day)
+    otcday= '{}/{:02}/{:02}'.format(year-1911,month,day)
+    otc_rebuild_name = otcday.replace('/','')
+    otc_filename = 'stock_rebuld_data\\'+otc_rebuild_name+"_otcstock.csv"
+    if Build_fubon_data_to_my_db.check_db_file_exist(otc_filename) == False: 
+        get_sotck_price.downloadOTC(otcday)
+        sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(otc_rebuild_name,stockid)
+    else:
+        sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(otc_rebuild_name,stockid)
+    Build_fubon_data_to_my_db.gsclose = sclose
+    Build_fubon_data_to_my_db.gsrage = srage
+    Build_fubon_data_to_my_db.gsopen = sopen
+    Build_fubon_data_to_my_db.gshigh = shigh
+    Build_fubon_data_to_my_db.gslow = slow
+    #1100318
     #folder_twday = "20210311"
+
+    
 
     try:
         os.makedirs('histock_original_data/'+folder_twday)
@@ -152,8 +169,10 @@ for dc in range(16,-1,-1):
     stockid = '8299'
     dbname = 'db/'+stockid+'_database_1.csv'
     DataFrameDb = None
+   
     if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
         DataFrameDb = pd.read_csv(dbname,encoding='utf-8')
+    
     for r in range(0,row):
         print(folder_twday + ">> " + str(r) + "/" + str(row))
         if df.代號[r][3]=='0' and (df.代號[r][2]>='0' and df.代號[r][2]<='9'):
@@ -179,15 +198,15 @@ for dc in range(16,-1,-1):
             if subBrok == '0031003000340044':
                 subBrok = '0031003000340044'
             log.log('.....name  :'+findBrokName)            
-            stockid = '8299'
+            
             res,filename = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
             df1 = parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainBrok,subBrok,twday)
             if df1 is None:
                 continue
             if DataFrameDb is None:
-                DataFrameDb = Build_fubon_data_to_my_db.fubon_create_database(df1,findBrokName,dbname,twday)
+                DataFrameDb = Build_fubon_data_to_my_db.fubon_create_database(df1,findBrokName,dbname,twday,otc_rebuild_name,stockid)
 
-            Build_fubon_data_to_my_db.trans_data_to_db(DataFrameDb,df1,findBrokName,stockid,twday)
+            Build_fubon_data_to_my_db.trans_data_to_db(DataFrameDb,df1,findBrokName,stockid,twday,otc_rebuild_name)
 
             if res == False:
                 log.log('downloaded from internet ' + mainBrok+ '-' +subBrok)

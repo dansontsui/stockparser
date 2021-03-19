@@ -10,7 +10,12 @@ import time
 import log
 import logging
 import os
-
+import get_sotck_price
+gsclose=0
+gsrage=0
+gsopen=0
+gshigh=0
+gslow =0
 
 def check_db_file_exist(filename):
     filepath = filename
@@ -27,10 +32,12 @@ def check_db_file_exist(filename):
     else:
         #print("檔案不存在。")
         return False
-def fubon_append_data_to_database(brokagename,source_df,db_dataFrame,sdate):
+def fubon_append_data_to_database(brokagename,source_df,db_dataFrame,sdate,otcdate,stockid):
     
     #dataFrame = pd.read_csv(rebuild_csv_filename,encoding='utf-8')
     #db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
+    #sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(otcdate,stockid)
+
     colindex = -1
     if brokagename not in db_dataFrame.columns:
         return False
@@ -45,7 +52,12 @@ def fubon_append_data_to_database(brokagename,source_df,db_dataFrame,sdate):
                 db_dataFrame[brokagename][idx] = int(source_df['買賣超(張)'][0])
             else:
                 db_dataFrame[brokagename][idx]  = int(db_dataFrame[brokagename][idx-1])  + int(source_df['買賣超(張)'][0])
-        break          
+            db_dataFrame['收盤'][idx] = gsclose
+            db_dataFrame['漲跌'][idx] = gsrage
+            db_dataFrame['開盤'][idx]  = gsopen
+            db_dataFrame['最高'][idx]  = gshigh
+            db_dataFrame['最低'][idx]  = gslow
+            break          
     '''
     for index,row in db_dataFrame.iterrows():
         if str(row['日期']) == sdate:
@@ -95,31 +107,28 @@ def fubon_append_today_row(db_dataFrame,source_DF,brokename,sdate):
     #if appendcolumn==1 or appendrow==1:
     #    db_dataFrame.to_csv(dbname,encoding='utf-8',index=0)
     return 
-def fubon_create_database(df ,brokagename,dbname,sdate):
+def fubon_create_database(df ,brokagename,dbname,sdate,otcdate,stockid):
 
+    #sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(otcdate,stockid)
     s1 = sdate[0:3]+"/"+sdate[3:5]+"/"+sdate[5:7]
-    sclose=0
-    srage=0
-    sopen=0
-    shigh=0
-    slow=0
+
     #sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(sdate,stockid)
     #if sclose == 'ff':
     #    sclose = 'ff'
     Brokerage = []
     data1=[]
     Brokerage.append('日期')
-    data1.append(sdate)
+    data1.append(gsdate)
     Brokerage.append('收盤')
-    data1.append(sclose)
+    data1.append(gsclose)
     Brokerage.append('漲跌')
-    data1.append(srage)
+    data1.append(gsrage)
     Brokerage.append('開盤')
-    data1.append(sopen)
+    data1.append(gsopen)
     Brokerage.append('最高')
-    data1.append(shigh)
+    data1.append(gshigh)
     Brokerage.append('最低')
-    data1.append(slow)
+    data1.append(gslow)
     #dataFrame = pd.read_csv(rebuild_csv_filename,encoding='utf-8')
     Brokerage.append(brokagename)
     data1.append(df['買賣超(張)'][0])
@@ -133,13 +142,13 @@ def fubon_create_database(df ,brokagename,dbname,sdate):
     return dataFrame1
  
 
-def trans_data_to_db(dbDF,SourceDF,brokagename,stockid,sdate):
-   
-    rowcount = SourceDF.shape[0]
-    columncount = SourceDF.shape[1]
-    pattern = re.compile("[A-Za-z]+")
+def trans_data_to_db(dbDF,SourceDF,brokagename,stockid,sdate,otcdate):
+    #sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(otcdate,stockid)
+    #rowcount = SourceDF.shape[0]
+    #columncount = SourceDF.shape[1]
+    #pattern = re.compile("[A-Za-z]+")
     fubon_append_today_row(dbDF,SourceDF,brokagename,sdate)
-    fubon_append_data_to_database(brokagename,SourceDF,dbDF,sdate)
+    fubon_append_data_to_database(brokagename,SourceDF,dbDF,sdate,otcdate,stockid)
     '''for index,row in df.iterrows():
         s = row['券商名稱'] #stock name
         sid = re.search(r'[A-Za-z0-9]+',s).group()
