@@ -37,14 +37,15 @@ def fubon_append_data_to_database(brokagename,source_df,db_dataFrame,sdate):
     r = db_dataFrame.shape[0]
     if r >=1:
         r = r
+    disc = str(source_df['買賣超(張)'][0]).replace(',','')
     for idx in reversed(db_dataFrame.index):
         #print(db_dataFrame['日期'][idx])
         if str(db_dataFrame['日期'][idx]) == sdate:
             #if row[brokagename] == 0:
             if db_dataFrame.shape[0] ==1:
-                db_dataFrame[brokagename][idx] = int(source_df['買賣超(張)'][0])
+                db_dataFrame[brokagename][idx] = int(disc)
             else:
-                db_dataFrame[brokagename][idx]  = int(db_dataFrame[brokagename][idx-1])  + int(source_df['買賣超(張)'][0])
+                db_dataFrame[brokagename][idx]  = int(db_dataFrame[brokagename][idx-1])  + int(disc)
         break          
     '''
     for index,row in db_dataFrame.iterrows():

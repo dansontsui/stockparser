@@ -13,7 +13,7 @@ import os
 import Build_fubon_data_to_my_db
 
 def parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainid,subid,sdate):
-    soup = BeautifulSoup(open(filename,encoding="utf-8"), "html.parser")
+    soup = BeautifulSoup(filename, "html.parser")
     #header = soup.find_all("table")[3].find("tr")[1:]
     #header = soup.find_all("td",{"class":"t2"})
     #header = soup.find_all("table",{"class":"t0"}).find('tr')
@@ -53,8 +53,8 @@ def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate):
 
     major_file_name = 'histock_original_data/'+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_major_fubon_1_'+sdate+'.html'
 
-    if os.path.isfile(major_file_name):
-        return True,major_file_name
+    #if os.path.isfile(major_file_name):
+    #    return True,major_file_name
 
     headers = {
         'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',
@@ -73,11 +73,11 @@ def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate):
     #download otc all stock data
     get_sotck_price.downloadOTC(s2[0]+"/"+s2[1]+"/"+s2[2])
     '''
-   
-    f = open(major_file_name, mode='w', encoding='utf-8')
-    f.write(r.text)
-    f.close()
-    return False,major_file_name
+    
+    #f = open(major_file_name, mode='w', encoding='utf-8')
+    #f.write(r.text)
+    #f.close()
+    return False,r.text
 
 def load_broker_id_from_csv():
     #pd.read_csv处理空格和tab分割符问题
@@ -180,8 +180,15 @@ for dc in range(16,-1,-1):
                 subBrok = '0031003000340044'
             log.log('.....name  :'+findBrokName)            
             stockid = '8299'
-            res,filename = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
-            df1 = parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainBrok,subBrok,twday)
+            checkfile = "histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainBrok+'_'+subBrok+'_'+twday+"_rebuid.csv"
+            if mainBrok == '9800' and folder_twday=='20210303':
+                mainBrok = '9800'
+            res = True
+            if Build_fubon_data_to_my_db.check_db_file_exist(checkfile) == False:
+                res,htmldata = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
+                df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday)
+            else:
+                df1 = pd.read_csv(checkfile,encoding='utf-8')
             if df1 is None:
                 continue
             if DataFrameDb is None:
@@ -191,10 +198,10 @@ for dc in range(16,-1,-1):
 
             if res == False:
                 log.log('downloaded from internet ' + mainBrok+ '-' +subBrok)
-                time.sleep(1)
+                #stime.sleep(1)
         except:
             DataFrameDb.to_csv(dbname,encoding='utf-8',index=0)
-            log.log("exception"+','+folder_twday+','+filename+','+mainBrok +","+subBrok+","+twday)
+            log.log("exception"+','+folder_twday+','+checkfile+','+mainBrok +","+subBrok+","+twday)
     to1 = time.time() - to0
     log.log('test time'+str(to1))
     DataFrameDb.to_csv(dbname,encoding='utf-8',index=0)
