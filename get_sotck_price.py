@@ -12,6 +12,7 @@ from urllib.parse import urlencode
 import requests
 from io import StringIO
 import re
+import os
 
 def twdate(date):
     year  = date.year-1911
@@ -114,7 +115,7 @@ def internet_otc_to_csv(IOtext):
             end = 1
         if start==1 and end==0:
             line2 += line1
-    filename = 'stock_rebuld_data\\'+sdate+"_otcstock.csv"
+    filename = 'stock_rebuld_data/'+sdate+"_otcstock.csv"
     f = open(filename, mode='w', encoding='utf-8')
     f.write(line2)
     f.close()
@@ -143,14 +144,17 @@ def downloadOTC(date):
     print(url)
     r = requests.post(url)
 # 整理資料，變成表格
-    f = open('stock_original_data\\'+sd2+"_original_data.csv", mode='w', encoding='utf-8')
+
+
+
+    f = open('stock_original_data/'+sd2+"_original_data.csv", mode='w', encoding='utf-8')
     sio = StringIO(r.text)
     sioSize = sio.seek(0,2)
     f.write(sio.read())
     f.close()
 
     if sioSize < 2048:
-        return 
+        return ''
     sio.seek(0)
     #sio = StringIO(r.text)
     fileName = internet_otc_to_csv(sio)
@@ -158,7 +162,7 @@ def downloadOTC(date):
     return fileName
 
 def get_otc_history_from_file(sdate,stockid):
-     filename = 'stock_rebuld_data\\'+sdate+"_otcstock.csv"
+     filename = 'stock_rebuld_data/'+sdate+"_otcstock.csv"
      df = pd.read_csv(filename,encoding='utf-8')
      row  =  df.shape[0]
      for r in range(1,row):

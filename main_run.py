@@ -11,6 +11,8 @@ import create_db
 import get_sotck_price
 
 #http://fubon-ebrokerdj.fbs.com.tw/z/zc/zco/zco0/zco0.djhtm?a=8299&BHID=9800&b=9800
+#get one stock history
+#https://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43_download_UTF-8.php?l=zh-tw&d=110/03&stkno=8299&s=0,asc,0
 def craete_history(sotckid,filedate):
     #load data form internet
     

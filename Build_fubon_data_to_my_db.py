@@ -120,7 +120,7 @@ def fubon_create_database(df ,brokagename,dbname,sdate,otcdate,stockid):
     Brokerage = []
     data1=[]
     Brokerage.append('日期')
-    data1.append(gsdate)
+    data1.append(sdate)
     Brokerage.append('收盤')
     data1.append(gsclose)
     Brokerage.append('漲跌')

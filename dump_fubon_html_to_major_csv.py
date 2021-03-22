@@ -117,24 +117,47 @@ a = str(df.代號[0])
 
 #craete folder
 
+try:
+    os.makedirs('stock_original_data')
+except OSError:
+    print ("Creation of the directory")
 
+try:
+    os.makedirs('stock_rebuld_data')
+except OSError:
+    print ("Creation of the directory")
 
 pattern = re.compile("[A-Za-z]+")
 
 # if found match (entire string matches pattern)
 #a = str(df.代號[r])
 stockid = '8299'
-for dc in range(1,-1,-1):
+#for dc in range(19,-1,-1):
+'''
+startdate = dt.datetime(2021,2,19)
+enddate = dt.datetime＃(2021, 3,21)
+'''
+startdate = dt.datetime.today()
+enddate = dt.datetime.today()
+totaldays = (enddate - startdate).days + 1
+
+for daynumber in range(totaldays):
+    datestring = (startdate + dt.timedelta(days = daynumber)).date()
+        #print datestring.strftime("%Y%m%d") 
     to0 = time.time()
-    day   = downloadDate.day-dc
+    year = datestring.year
+    month = datestring.month
+    day   = datestring.day
     twday = '{}-{:1}-{:1}'.format(year,month,day)
     dbDate = '{}-{:02}-{:02}'.format(year,month,day)
     folder_twday= '{}{:02}{:02}'.format(year,month,day)
     otcday= '{}/{:02}/{:02}'.format(year-1911,month,day)
     otc_rebuild_name = otcday.replace('/','')
-    otc_filename = 'stock_rebuld_data\\'+otc_rebuild_name+"_otcstock.csv"
+    otc_filename = 'stock_rebuld_data/'+otc_rebuild_name+"_otcstock.csv"
     if Build_fubon_data_to_my_db.check_db_file_exist(otc_filename) == False: 
-        get_sotck_price.downloadOTC(otcday)
+        fn = get_sotck_price.downloadOTC(otcday)
+        if fn == '':
+            continue
         sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(otc_rebuild_name,stockid)
     else:
         sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(otc_rebuild_name,stockid)
@@ -173,7 +196,7 @@ for dc in range(1,-1,-1):
     if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
         DataFrameDb = pd.read_csv(dbname,encoding='utf-8')
     
-    for r in range(0,row):
+    for r in range(0,row):#每一家證券公司
         print(folder_twday + ">> " + str(r) + "/" + str(row))
         if df.代號[r][3]=='0' and (df.代號[r][2]>='0' and df.代號[r][2]<='9'):
             mainBrok = df.代號[r]
