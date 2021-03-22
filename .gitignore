@@ -174,7 +174,7 @@ stock_original_data/
 stock_rebuld_data/
 histock_original_data/
 histock_rebuild_data/
-db/
+
 
 # Publish Web Output
 *.[Pp]ublish.xml
