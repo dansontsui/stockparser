@@ -13,8 +13,8 @@ import os
 import Build_fubon_data_to_my_db
 import get_sotck_price
 
-def parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainid,subid,sdate):
-    soup = BeautifulSoup(filename, "html.parser")
+def parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainid,subid,sdate):
+    soup = BeautifulSoup(htmldata, "html.parser")
     #header = soup.find_all("table")[3].find("tr")[1:]
     #header = soup.find_all("td",{"class":"t2"})
     #header = soup.find_all("table",{"class":"t0"}).find('tr')
@@ -131,20 +131,21 @@ pattern = re.compile("[A-Za-z]+")
 
 # if found match (entire string matches pattern)
 #a = str(df.代號[r])
-#stockid = '6142'
-stockid = '8299'
+stockid = '6142'
+#stockid = '8299'
 #for dc in range(19,-1,-1):
 
-#startdate = dt.datetime(2021,3,19)
-#enddate = dt.datetime(2021, 3,21)
+startdate = dt.datetime(2021,1,1)
+enddate = dt.datetime(2021, 3,23)
 
-startdate = dt.datetime.today()
-enddate = dt.datetime.today()
+#startdate = dt.datetime.today()
+#enddate = dt.datetime.today()
 
 totaldays = (enddate - startdate).days + 1
 
 for daynumber in range(totaldays):
     datestring = (startdate + dt.timedelta(days = daynumber)).date()
+    
         #print datestring.strftime("%Y%m%d") 
     to0 = time.time()
     year = datestring.year
@@ -155,14 +156,14 @@ for daynumber in range(totaldays):
     folder_twday= '{}{:02}{:02}'.format(year,month,day)
     otcday= '{}/{:02}/{:02}'.format(year-1911,month,day)
     otc_rebuild_name = otcday.replace('/','')
-    otc_filename = 'stock_rebuld_data/'+otc_rebuild_name+"_otcstock.csv"
+    otc_filename = 'stock_rebuld_data/'+folder_twday+"_twsestock.csv"
     if Build_fubon_data_to_my_db.check_db_file_exist(otc_filename) == False: 
-        fn = get_sotck_price.downloadOTC(otcday)
+        fn = get_sotck_price.downloadTWSE(folder_twday)
         if fn == '':
             continue
-        sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(otc_filename,stockid)
+        sclose,srage,sopen,shigh,slow = get_sotck_price.get_twse_history_from_file(otc_filename,stockid)
     else:
-        sclose,srage,sopen,shigh,slow = get_sotck_price.get_otc_history_from_file(otc_filename,stockid)
+        sclose,srage,sopen,shigh,slow = get_sotck_price.get_twse_history_from_file(otc_filename,stockid)
     Build_fubon_data_to_my_db.gsclose = sclose
     Build_fubon_data_to_my_db.gsrage = srage
     Build_fubon_data_to_my_db.gsopen = sopen
@@ -234,8 +235,8 @@ for daynumber in range(totaldays):
             else:
                 df1 = pd.read_csv(checkfile,encoding='utf-8')
             
-            res,filename = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
-            df1 = parser_major_data_to_csv_data(folder_twday,filename,findBrokName,mainBrok,subBrok,twday)
+            res,htmldata = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
+            df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday)
             if df1 is None:
                 continue
             if DataFrameDb is None:

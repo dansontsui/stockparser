@@ -20,24 +20,53 @@ def twdate(date):
     day   = date.day
     twday = '{}/{:02}/{:02}'.format(year,month,day)
     return twday
+    
+def downloadTWSE(date):
+    url="http://www.twse.com.tw/ch/trading/exchange/MI_INDEX/MI_INDEX.php"
+    values = {'download`' : 'csv', 'qdate' : twdate(date), 'selectType' : 'ALLBUT0999' }
+    agent = 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0'
+    #httplib2.debuglevel = 1
+    conn = httplib2.Http('.cache')
+    headers = {'Content-type': 'application/x-www-form-urlencoded',
+               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+               'User-Agent': agent}
+
+    resp, content = conn.request(url, 'POST', urlencode(values), headers)
+
+    respStr = str(content.decode('utf-8'))
+
+    srcTWSE = list(csv.reader(respStr.split('\n'), delimiter=','))
+    #search stock list
+    firstIndex=0
+    lastIndex=0
+    for i in range(len(srcTWSE)):
+        row = srcTWSE[i]
+        if (len(row)>15):  #16 columns
+            row[0]=row[0].strip(' =\"')
+            row[1]=row[1].strip(' =\"')
+            if (row[0]=='0050'):  #1st stock ID
+
+                firstIndex=i
+
+            elif (row[0]=='9958'): #lastest stock ID
+
+                lastIndex=i+1
+
+                break
+
+    #print('TWSE index=',firstIndex,lastIndex)
+
+    listTWSE = srcTWSE[firstIndex:lastIndex]
+
+    #print(listTWSE[0])
+
+    resultTWSE = [row[:2]+row[5:9]+row[2:3] for row in listTWSE]
+
+    #print(resultTWSE[0])
+
+    return resultTWSE
 
 
-
-def downloadTWSE(datestr):
-    # 下載股價
-    r = requests.post('https://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date=' + datestr + '&type=ALL')
-    if len(r.text) == 0:
-        return ''
-    # 整理資料，變成表格
-    df = pd.read_csv(StringIO(r.text.replace("=", "")), 
-                header=["證券代號" in l for l in r.text.split("\n")].index(True)-1)
-    # 整理一些字串：
-    df = df.apply(lambda s: s.astype(str).str.replace(",", "").replace("+", "1").replace("-", "-1"))
-
-    filename = 'stock_rebuld_data/'+datestr+"_twsestock.csv"
-    df.to_csv(filename,encoding = 'utf=8')
-    return filename
-    #print(df.head())
 
 def downloadOTC1(date):
 
@@ -94,7 +123,6 @@ def downloadOTCoriginaldate(date):
     sd = twdate(date)
     sd1=sd.split('/')
     sd2 = sd1[0] + sd1[1] + sd1[2]
-    
     url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d='+sd+'&s=0,asc,0'
     #url = 'https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=csv&d='+sd+'&s=0,asc,0'
     r = requests.post(url)
@@ -131,16 +159,8 @@ def downloadOTC(date):
     #df = pd.read_csv(fileName)
     return fileName
 
-def get_twse_history_from_file(filename,stockid):
-     #filename = 'stock_rebuld_data/'+sdate+"_otcstock.csv"
-     df = pd.read_csv(filename,encoding='utf-8')
-     row  =  df.shape[0]
-     for r in range(1,row):
-         if df["證券代號"][r] == stockid:
-             return df["收盤價"][r], df["漲跌價差"][r], df["開盤價"][r],df["最高價"][r],df["最低價"][r]
-     return 'ff','ff','ff','ff','ff'
-def get_otc_history_from_file(filename,stockid):
-     #filename = 'stock_rebuld_data/'+sdate+"_otcstock.csv"
+def get_otc_history_from_file(sdate,stockid):
+     filename = 'stock_rebuld_data/'+sdate+"_otcstock.csv"
      df = pd.read_csv(filename,encoding='utf-8')
      row  =  df.shape[0]
      for r in range(1,row):
