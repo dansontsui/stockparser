@@ -2,15 +2,15 @@
 
 # -*- coding: utf-8 -*-
 
-import csv
-import numpy as np
-import datetime as dt
+#import csv
+#import numpy as np
+#import datetime as dt
 import pandas as pd
-from datetime import timedelta
-import httplib2
-from urllib.parse import urlencode
-import requests
-from io import StringIO
+#from datetime import timedelta
+#import httplib2
+#from urllib.parse import urlencode
+#import requests
+#from io import StringIO
 import re
 import os
 
@@ -196,64 +196,24 @@ def showStock(stockID, stockName, Open, High, Low, Close,Volume):
 
 #main
 
-downloadDate= dt.date.today() #- timedelta(days=2)
+df = pd.read_csv('db/6142_database_1.csv',encoding='utf-8')
+df1 = df.copy()
+print(df.head())
+s = df[1:10]
 
-# download TWSE
-'''
-listTWSE = downloadTWSE(downloadDate)
+rows=df.shape[0]
+cols=df.shape[1]
 
-#get result
-result = np.array(listTWSE)
+ss1 = df.iloc[0:rows-2,6:cols-1]
+ss2 = df1.iloc[1:rows-1,6:cols-1]
 
-stockID=result[:,0]
-
-stockName=result[:,1]
-
-Open=result[:,2]
-
-High=result[:,3]
-
-Low=result[:,4]
-
-Close=result[:,5]
-
-Volume=result[:,6]
-
-print('TWSE count=',len(stockID))
-
-#showStock(stockID, stockName, Open, High, Low, Close,Volume)
+ss1.reset_index(drop = True)
+ss1.reset_index(drop = True)
+ss2.reset_index(drop = True)
+ss3 = ss2-ss1
+#print(df.iloc[1:4])
+print(ss.head())
 
 
-'''
-#download OTC
-#listOTC = downloadOTC1(downloadDate)
-#for i in range(20,0,-1):
-#    downloadDate= dt.date.today() - timedelta(days=i)
-#    listOTC=downloadOTC(downloadDate)
 
-'''
-#get result
-
-result = np.array(listOTC)
-
-stockID=result[:,0]
-
-stockName=result[:,1]
-
-Open=result[:,2]
-
-High=result[:,3]
-Low=result[:,4]
-Close=result[:,5]
-Volume=result[:,6]
-print('OTC count=',len(stockID))
-#showStock(stockID, stockName, Open, High, Low, Close,Volume)
-#save result
-Title =  ['股票代碼', '股票名稱', '開盤價', '最高價','最低價','收盤價','成交股數']
-f = open("TwStockList.csv","w")
-w = csv.writer(f, lineterminator='\n')
-w.writerows([Title])
-w.writerows(listTWSE)   #TWSE list
-w.writerows(listOTC)    #OTC list
-f.close()
-'''
+    
