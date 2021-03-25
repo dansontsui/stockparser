@@ -198,26 +198,25 @@ def showStock(stockID, stockName, Open, High, Low, Close,Volume):
 
 aa = [['A',1,2,3],['B',4,5,6],['C',7,8,9]]
 bb = [['D',999,999,999],['E',777,777,777]]
-
-df = pd.read_csv('db/6142_database_test.csv',encoding='utf-8')
+'''
+df = pd.read_csv('db/6142_database_1_test.csv',encoding='utf-8')
 #df = pd.DataFrame(data = aa)
 #df1 = pd.DataFrame(data = bb)
 
-ss0 = df.iloc[0:2,1:4] + 1 
-ss1 = df.iloc[1:4,1:4] + 10 
+ss0 = df.iloc[0:49,6:10]
+ss1 = df.iloc[1:50,6:10]
+ss1 = ss1.reset_index(drop=True)
 print (ss1)
-df.loc[0:3,1:4] = ss1
-ss2 = df1.iloc[1:2,1:4]
-ss2 = ss2+100
-print (ss1)
-
-print (ss1)
-ss1 = ss2
-
-print (ss2)
+ss3 = ss1-ss0
+print(ss3)
+df =df.drop(0)
+df = df.reset_index(drop=True)
+df.loc[0:49,6:10] = ss3
 
 
-df = pd.read_csv('db/6142_database_test.csv',encoding='utf-8')
+
+'''
+df = pd.read_csv('db/6142_database_1.csv',encoding='utf-8')
 #df1 = pd.read_csv('db/6142_database_1.csv',encoding='utf-8')
 df.reset_index(drop=True)
 print(df.head())
@@ -226,25 +225,22 @@ s = df[1:10]
 rows=df.shape[0]
 cols=df.shape[1]
 
-ss1 = df.iloc[0:rows-1,6:cols-1]
-ss2 = df.iloc[1:rows,6:cols-1]
+#ss0 = df.iloc[0:49,6:10]
+#ss1 = df.iloc[1:50,6:10]
+#ss1 = ss1.reset_index(drop=True)
 
-#ss1 = df.iloc[0:10-2,6:10-1]
-#ss2 = df.iloc[1:10-1,6:10-1]
-a = ss1.shape[0]
-b = ss2.shape[0]
-ss1 = ss1.reset_index(drop = True)
-#ss1.reset_index(drop = True)
-ss2 = ss2.reset_index(drop = True)
-#ss3 = round((ss2-ss1)/50)
+ss1 = df.iloc[0:rows,6:cols-1]
+ss2 = df.iloc[1:rows+1,6:cols-1]
+ss2 = ss2.reset_index(drop=True)
+print (ss1)
 ss3 = ss2-ss1
-df = df.drop(0)
-df.reset_index(drop = True)
-#df.iloc[1] = ss3.iloc[1]
-df.iloc[0:rows-1,6:cols-1] = ss3
+print(ss3)
+df =df.drop(0)
+df = df.reset_index(drop=True)
+df.loc[0:rows,6:cols-1] = ss3
+
 df.to_csv('dis.csv',encoding='utf-8',index=0)
-#print(df.iloc[1:4])
-print(ss3.head())
+
 
 
 
