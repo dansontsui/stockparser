@@ -198,24 +198,27 @@ def showStock(stockID, stockName, Open, High, Low, Close,Volume):
 
 aa = [['A',1,2,3],['B',4,5,6],['C',7,8,9]]
 bb = [['D',999,999,999],['E',777,777,777]]
-df = pd.DataFrame(data = aa)
-df1 = pd.DataFrame(data = bb)
 
-ss1 = df.iloc[1:3,1:4] + 1 
+df = pd.read_csv('db/6142_database_test.csv',encoding='utf-8')
+#df = pd.DataFrame(data = aa)
+#df1 = pd.DataFrame(data = bb)
+
+ss0 = df.iloc[0:2,1:4] + 1 
+ss1 = df.iloc[1:4,1:4] + 10 
 print (ss1)
 df.loc[0:3,1:4] = ss1
 ss2 = df1.iloc[1:2,1:4]
 ss2 = ss2+100
 print (ss1)
-ss1 = ss1.drop([0])
+
 print (ss1)
 ss1 = ss2
 
 print (ss2)
 
 
-df = pd.read_csv('db/6142_database_1.csv',encoding='utf-8')
-df1 = pd.read_csv('db/6142_database_1.csv',encoding='utf-8')
+df = pd.read_csv('db/6142_database_test.csv',encoding='utf-8')
+#df1 = pd.read_csv('db/6142_database_1.csv',encoding='utf-8')
 df.reset_index(drop=True)
 print(df.head())
 s = df[1:10]
@@ -236,6 +239,7 @@ ss2 = ss2.reset_index(drop = True)
 #ss3 = round((ss2-ss1)/50)
 ss3 = ss2-ss1
 df = df.drop(0)
+df.reset_index(drop = True)
 #df.iloc[1] = ss3.iloc[1]
 df.iloc[0:rows-1,6:cols-1] = ss3
 df.to_csv('dis.csv',encoding='utf-8',index=0)

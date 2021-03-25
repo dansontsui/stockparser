@@ -86,6 +86,7 @@ def load_broker_id_from_csv():
     return df
 
 #03-11 18:21:13 - Log.Parser - INFO 
+import dump_fubon_html_to_major_csv_twse
 
 logger = logging.getLogger('Log.Parser')
 logger.setLevel(logging.DEBUG)
