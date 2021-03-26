@@ -21,7 +21,7 @@ def twdate(date):
     twday = '{}/{:02}/{:02}'.format(year,month,day)
     return twday
 
-
+#20200109
 
 def downloadTWSE(datestr):
     # 下載股價

@@ -13,7 +13,7 @@ import os
 import Build_fubon_data_to_my_db
 import get_sotck_price
 
-def parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainid,subid,sdate):
+def parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainid,subid,sdate,stockid):
     soup = BeautifulSoup(htmldata, "html.parser")
     #header = soup.find_all("table")[3].find("tr")[1:]
     #header = soup.find_all("td",{"class":"t2"})
@@ -135,11 +135,11 @@ stockid = '6142'
 #stockid = '8299'
 #for dc in range(19,-1,-1):
 
-startdate = dt.datetime(2021,1,1)
-enddate = dt.datetime(2021, 3,25)
+#startdate = dt.datetime(2021,1,1)
+#enddate = dt.datetime(2021, 3,25)
 
-#startdate = dt.datetime.today()
-#enddate = dt.datetime.today()
+startdate = dt.datetime.today()
+enddate = dt.datetime.today()
 
 totaldays = (enddate - startdate).days + 1
 
@@ -231,12 +231,12 @@ for daynumber in range(totaldays):
             res = True
             if Build_fubon_data_to_my_db.check_db_file_exist(checkfile) == False:
                 res,htmldata = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday,stockid)
-                df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday)
+                df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday,stockid)
             else:
                 df1 = pd.read_csv(checkfile,encoding='utf-8')
             
             res,htmldata = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday,stockid)
-            df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday)
+            df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday,stockid)
             if df1 is None:
                 continue
             if DataFrameDb is None:
