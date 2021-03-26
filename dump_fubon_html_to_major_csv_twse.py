@@ -13,7 +13,7 @@ import os
 import Build_fubon_data_to_my_db
 import get_sotck_price
 
-def parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainid,subid,sdate):
+def parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainid,subid,sdate,stockid):
     soup = BeautifulSoup(htmldata, "html.parser")
     #header = soup.find_all("table")[3].find("tr")[1:]
     #header = soup.find_all("td",{"class":"t2"})
@@ -45,11 +45,11 @@ def parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainid,subi
     
 
     dataFrame = pd.DataFrame(data = dataarr, columns = columns1)
-    dataFrame.to_csv("histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_'+sdate+"_rebuid.csv",encoding='utf-8',index=0)
+    dataFrame.to_csv("histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_'+sdate+"_"+stockid+"_rebuid.csv",encoding='utf-8',index=0)
     return dataFrame
     #print(dataFrame.head())
 
-def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate):
+def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate,sotckid):
     #load data form internet
 
     major_file_name = 'histock_original_data/'+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_major_fubon_1_'+sdate+'.html'
@@ -61,7 +61,7 @@ def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate):
         'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',
         'Cookie':'gr_user_id=1f9ea7ea-462a-4a6f-9d55-156631fc6d45; bid=vPYpmmD30-k; ll="118282"; ue="codin; __utmz=30149280.1499577720.27.14.utmcsr=douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/doulist/240962/; __utmv=30149280.3049; _vwo_uuid_v2=F04099A9dd; viewed="27607246_26356432"; ap=1; ps=y; push_noty_num=0; push_doumail_num=0; dbcl2="30496987:gZxPfTZW4y0"; ck=13ey; _pk_ref.100001.8cb4=%5B%22%22%2C%22%22%2C1515153574%2C%22https%3A%2F%2Fbook.douban.com%2Fmine%22%5D; __utma=30149280.833870293.1473539740.1514800523.1515153574.50; __utmc=30149280; _pk_id.100001.8cb4=255d8377ad92c57e.1473520329.20.1515153606.1514628010.'
     }
-    url = 'http://fubon-ebrokerdj.fbs.com.tw/z/zc/zco/zco0/zco0.djhtm?A=8299&BHID='+mainid+'&b='+subid+'&C=1&D='+sdate+'&E='+sdate+'&ver=V3'
+    url = 'http://fubon-ebrokerdj.fbs.com.tw/z/zc/zco/zco0/zco0.djhtm?A='+sotckid+'&BHID='+mainid+'&b='+subid+'&C=1&D='+sdate+'&E='+sdate+'&ver=V3'
     #url = 'https://fubon-ebrokerdj.fbs.com.tw/z/zg/zgb/zgb0.djhtm?a='+mainid+'&b='+subid+'&c=E&e='+sdate+'&f='+sdate
     r = requests.get(url,headers = headers)
     #parser html date
@@ -135,11 +135,11 @@ stockid = '6142'
 #stockid = '8299'
 #for dc in range(19,-1,-1):
 
-startdate = dt.datetime(2021,3,24)
-enddate = dt.datetime(2021, 3,24)
+#startdate = dt.datetime(2021,1,1)
+#enddate = dt.datetime(2021, 3,25)
 
-#startdate = dt.datetime.today()
-#enddate = dt.datetime.today()
+startdate = dt.datetime.today()
+enddate = dt.datetime.today()
 
 totaldays = (enddate - startdate).days + 1
 
@@ -225,18 +225,18 @@ for daynumber in range(totaldays):
                 subBrok = '0031003000340044'
             log.log('.....name  :'+findBrokName)            
             #stockid = '8299'
-            checkfile = "histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainBrok+'_'+subBrok+'_'+twday+"_rebuid.csv"
+            checkfile = "histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainBrok+'_'+subBrok+'_'+twday+"_"+stockid+"_rebuid.csv"
             if mainBrok == '9800' and folder_twday=='20210303':
                 mainBrok = '9800'
             res = True
             if Build_fubon_data_to_my_db.check_db_file_exist(checkfile) == False:
-                res,htmldata = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
-                df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday)
+                res,htmldata = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday,stockid)
+                df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday,stockid)
             else:
                 df1 = pd.read_csv(checkfile,encoding='utf-8')
             
-            res,htmldata = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday)
-            df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday)
+            res,htmldata = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday,stockid)
+            df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday,stockid)
             if df1 is None:
                 continue
             if DataFrameDb is None:
