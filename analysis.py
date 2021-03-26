@@ -233,15 +233,14 @@ ss1 = df.iloc[0:rows,6:cols-1]
 ss2 = df.iloc[1:rows+1,6:cols-1]
 ss2 = ss2.reset_index(drop=True)
 print (ss1)
-ss3 = ss2-ss1
+ss3 = (ss2-ss1)/50
 print(ss3)
 df =df.drop(0)
 df = df.reset_index(drop=True)
 df.loc[0:rows,6:cols-1] = ss3
-
+sumdata = []
+rows=df.shape[0]
+for row in range(0,rows):
+    sumdata.append(df.iloc[row:row+1,6:cols-1].sum())
+df["c_value"] = sumdata
 df.to_csv('dis.csv',encoding='utf-8',index=0)
-
-
-
-
-    

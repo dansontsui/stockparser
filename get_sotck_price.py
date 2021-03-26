@@ -130,12 +130,17 @@ def downloadOTC(date):
     fileName = internet_otc_to_csv(sio)
     #df = pd.read_csv(fileName)
     return fileName
-
+def get_twse_df_from_history_from_file(filename,stockid):
+      #filename = 'stock_rebuld_data/'+sdate+"_otcstock.csv"
+     df = pd.read_csv(filename,encoding='utf-8')
+     row  =  df.shape[0]
+     return df["證券代號"]
+     
 def get_twse_history_from_file(filename,stockid):
      #filename = 'stock_rebuld_data/'+sdate+"_otcstock.csv"
      df = pd.read_csv(filename,encoding='utf-8')
      row  =  df.shape[0]
-     for r in range(1,row):
+     for r in range(0,row):
          if df["證券代號"][r] == stockid:
              return df["收盤價"][r], df["漲跌價差"][r], df["開盤價"][r],df["最高價"][r],df["最低價"][r]
      return 'ff','ff','ff','ff','ff'
