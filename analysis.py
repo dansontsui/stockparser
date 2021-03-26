@@ -233,7 +233,7 @@ ss1 = df.iloc[0:rows,6:cols-1]
 ss2 = df.iloc[1:rows+1,6:cols-1]
 ss2 = ss2.reset_index(drop=True)
 print (ss1)
-ss3 = ss2-ss1
+ss3 = (ss2-ss1) / 50
 print(ss3)
 df =df.drop(0)
 df = df.reset_index(drop=True)
