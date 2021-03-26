@@ -45,7 +45,7 @@ def parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainid,subi
     
 
     dataFrame = pd.DataFrame(data = dataarr, columns = columns1)
-    dataFrame.to_csv("histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_'+sdate+"_rebuid.csv",encoding='utf-8',index=0)
+    dataFrame.to_csv("histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainid+'_'+subid+'_'+sdate+"_"+stockid+"_rebuid.csv",encoding='utf-8',index=0)
     return dataFrame
     #print(dataFrame.head())
 
@@ -135,11 +135,11 @@ stockid = '6142'
 #stockid = '8299'
 #for dc in range(19,-1,-1):
 
-#startdate = dt.datetime(2021,3,25)
-#enddate = dt.datetime(2021, 3,25)
+startdate = dt.datetime(2021,1,1)
+enddate = dt.datetime(2021, 3,25)
 
-startdate = dt.datetime.today()
-enddate = dt.datetime.today()
+#startdate = dt.datetime.today()
+#enddate = dt.datetime.today()
 
 totaldays = (enddate - startdate).days + 1
 
@@ -225,7 +225,7 @@ for daynumber in range(totaldays):
                 subBrok = '0031003000340044'
             log.log('.....name  :'+findBrokName)            
             #stockid = '8299'
-            checkfile = "histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainBrok+'_'+subBrok+'_'+twday+"_rebuid.csv"
+            checkfile = "histock_rebuild_data/"+folder_twday+"/"+findBrokName+'_'+mainBrok+'_'+subBrok+'_'+twday+"_"+stockid+"_rebuid.csv"
             if mainBrok == '9800' and folder_twday=='20210303':
                 mainBrok = '9800'
             res = True
