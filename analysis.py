@@ -216,7 +216,10 @@ df.loc[0:49,6:10] = ss3
 
 
 '''
-df = pd.read_csv('db/6142_database_1.csv',encoding='utf-8')
+df = pd.read_csv('db/6142_database_1.csv',encoding='utf-16')
+
+
+
 #df1 = pd.read_csv('db/6142_database_1.csv',encoding='utf-8')
 df.reset_index(drop=True)
 print(df.head())
@@ -240,7 +243,12 @@ df = df.reset_index(drop=True)
 df.loc[0:rows,6:cols-1] = ss3
 sumdata = []
 rows=df.shape[0]
+
 for row in range(0,rows):
-    sumdata.append(df.iloc[row:row+1,6:cols-1].sum())
+    sumdata.append(0)
 df["c_value"] = sumdata
-df.to_csv('dis.csv',encoding='utf-8',index=0)
+sumdata.clear()
+for row in range(0,rows):
+    sumdata.append(df.iloc[row,6:cols-1].sum())
+df["c_value"] = sumdata
+df.to_csv('dis.csv',encoding='utf-16',index=0)

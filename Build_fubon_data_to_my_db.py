@@ -139,7 +139,7 @@ def fubon_create_database(df ,brokagename,dbname,sdate,otcdate,stockid):
     data2.append(data1)
 
     dataFrame1 = pd.DataFrame(data = data2, columns = Brokerage)
-    dataFrame1.to_csv(dbname, encoding='utf-8',index=0) 
+    dataFrame1.to_csv(dbname, encoding='utf-16',index=0) 
 
     return dataFrame1
  

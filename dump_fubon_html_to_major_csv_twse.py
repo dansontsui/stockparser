@@ -135,11 +135,11 @@ stockid = '6142'
 #stockid = '8299'
 #for dc in range(19,-1,-1):
 
-#startdate = dt.datetime(2021,1,1)
-#enddate = dt.datetime(2021, 3,25)
+startdate = dt.datetime(2021,1,1)
+enddate = dt.datetime(2021, 3,26)
 
-startdate = dt.datetime.today()
-enddate = dt.datetime.today()
+#startdate = dt.datetime.today()
+#enddate = dt.datetime.today()
 
 totaldays = (enddate - startdate).days + 1
 
@@ -197,7 +197,7 @@ for daynumber in range(totaldays):
     DataFrameDb = None
    
     if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
-        DataFrameDb = pd.read_csv(dbname,encoding='utf-8')
+        DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
     
     for r in range(0,row):#每一家證券公司
         print(folder_twday + ">> " + str(r) + "/" + str(row))
@@ -235,8 +235,8 @@ for daynumber in range(totaldays):
             else:
                 df1 = pd.read_csv(checkfile,encoding='utf-8')
             
-            res,htmldata = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday,stockid)
-            df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday,stockid)
+            #res,htmldata = save_oridata_form_fubon(folder_twday,findBrokName,mainBrok,subBrok,twday,stockid)
+            #df1 = parser_major_data_to_csv_data(folder_twday,htmldata,findBrokName,mainBrok,subBrok,twday,stockid)
             if df1 is None:
                 continue
             if DataFrameDb is None:
@@ -248,11 +248,11 @@ for daynumber in range(totaldays):
                 log.log('downloaded from internet ' + mainBrok+ '-' +subBrok)
                 #stime.sleep(1)
         except:
-            DataFrameDb.to_csv(dbname,encoding='utf-8',index=0)
+            DataFrameDb.to_csv(dbname,encoding='utf-16',index=0)
             log.log("exception"+','+folder_twday+','+checkfile+','+mainBrok +","+subBrok+","+twday)
     to1 = time.time() - to0
     log.log('test time'+str(to1))
-    DataFrameDb.to_csv(dbname,encoding='utf-8',index=0)
+    DataFrameDb.to_csv(dbname,encoding='utf-16',index=0)
 
 
     '''brokage_id_utf8 = a.encode("UTF-8")
