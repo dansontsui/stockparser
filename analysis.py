@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 #import csv
-#import numpy as np
+import numpy
 #import datetime as dt
 import pandas as pd
 #from datetime import timedelta
@@ -12,6 +12,7 @@ import pandas as pd
 #import requests
 #from io import StringIO
 import re
+import math
 #import os
 
 def twdate(date):
@@ -216,7 +217,7 @@ df.loc[0:49,6:10] = ss3
 
 
 '''
-df = pd.read_csv('db/6142_database_1.csv',encoding='utf-16')
+df = pd.read_csv('db/8299_database_1.csv',encoding='utf-8')
 
 
 
@@ -236,11 +237,23 @@ ss1 = df.iloc[0:rows,6:cols-1]
 ss2 = df.iloc[1:rows+1,6:cols-1]
 ss2 = ss2.reset_index(drop=True)
 print (ss1)
+a = math.floor(1.2)
 ss3 = (ss2-ss1)/50
 print(ss3)
 df =df.drop(0)
 df = df.reset_index(drop=True)
+#ss3 = numpy.floor(ss3) 
+#result = numpy.where((ss3 < 1 and ss3 < -1) , ss3, 0)
+#df.loc[0:rows,6:cols-1] = ss3
+srows=ss3.shape[0]
+scols=ss3.shape[1]
+for r in range(0,srows-1):
+    for c in range(0,scols-1):
+        if ss3.iloc[r,c] > -0.5 and ss3.iloc[r,c] < 0.5:
+            ss3.iloc[r,c] = 0
 df.loc[0:rows,6:cols-1] = ss3
+#df = df.apply(lambda s:numpy.floor(s) if type(s) == numpy.float64 else s)
+
 sumdata = []
 rows=df.shape[0]
 
@@ -251,4 +264,4 @@ sumdata.clear()
 for row in range(0,rows):
     sumdata.append(df.iloc[row,6:cols-1].sum())
 df["c_value"] = sumdata
-df.to_csv('dis.csv',encoding='utf-16',index=0)
+df.to_csv('dis8299.csv',encoding='utf-16',index=0)
