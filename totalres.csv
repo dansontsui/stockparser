@@ -1,0 +1,14 @@
+file,bin,error,stauts,plane0,plane1,plane2,plane3,early,slc 10 bit,slc 20 bit,slc 30 bit,slc 40 bit,slc 50 bit,slc 60 bit,others,Slc UECC,TLC 10 bit,TLC 20 bit,TLC 30 bit,TLC 40 bit,TLC 50 bit,TLC 60 bit,TLC others,TLC UECC,RetryBlockCount,ZeroCnt,PWRCnt,tempture,time
+E:\mygit\stockparser\otc_http_address.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\testjason.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\testjason_buy.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\testjason_sell.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\histock_original_data\testjason_buy.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\histock_original_data\testjason_sell.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\venv\Lib\site-packages\pip\_vendor\vendor.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\venv\Lib\site-packages\pip-21.0.1.dist-info\LICENSE.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\venv\Lib\site-packages\pip-21.0.1.dist-info\entry_points.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\venv\Lib\site-packages\pip-21.0.1.dist-info\top_level.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\venv\Lib\site-packages\setuptools-54.2.0.dist-info\dependency_links.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\venv\Lib\site-packages\setuptools-54.2.0.dist-info\entry_points.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+E:\mygit\stockparser\venv\Lib\site-packages\setuptools-54.2.0.dist-info\top_level.txt,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0

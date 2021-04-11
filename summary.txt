@@ -1,1 +1,53 @@
 03-11 18:19:29 - Log.Parser - INFO - test
+04-07 15:12:13 - Log.Parser - INFO - E:\mygit\stockparser\otc_http_address.txt
+04-07 15:12:13 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:13 - Log.Parser - INFO - E:\mygit\stockparser\testjason.txt
+04-07 15:12:13 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:13 - Log.Parser - INFO - E:\mygit\stockparser\testjason_buy.txt
+04-07 15:12:13 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:13 - Log.Parser - INFO - E:\mygit\stockparser\testjason_sell.txt
+04-07 15:12:13 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:18 - Log.Parser - INFO - E:\mygit\stockparser\histock_original_data\testjason_buy.txt
+04-07 15:12:18 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:18 - Log.Parser - INFO - E:\mygit\stockparser\histock_original_data\testjason_sell.txt
+04-07 15:12:18 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:21 - Log.Parser - INFO - E:\mygit\stockparser\venv\Lib\site-packages\pip\_vendor\vendor.txt
+04-07 15:12:21 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:22 - Log.Parser - INFO - E:\mygit\stockparser\venv\Lib\site-packages\pip-21.0.1.dist-info\LICENSE.txt
+04-07 15:12:22 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:22 - Log.Parser - INFO - E:\mygit\stockparser\venv\Lib\site-packages\pip-21.0.1.dist-info\entry_points.txt
+04-07 15:12:22 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:22 - Log.Parser - INFO - E:\mygit\stockparser\venv\Lib\site-packages\pip-21.0.1.dist-info\top_level.txt
+04-07 15:12:22 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:22 - Log.Parser - INFO - E:\mygit\stockparser\venv\Lib\site-packages\setuptools-54.2.0.dist-info\dependency_links.txt
+04-07 15:12:22 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:22 - Log.Parser - INFO - E:\mygit\stockparser\venv\Lib\site-packages\setuptools-54.2.0.dist-info\entry_points.txt
+04-07 15:12:22 - Log.Parser - INFO - 
+******************************************** 
+
+04-07 15:12:22 - Log.Parser - INFO - E:\mygit\stockparser\venv\Lib\site-packages\setuptools-54.2.0.dist-info\top_level.txt
+04-07 15:12:22 - Log.Parser - INFO - 
+******************************************** 
+

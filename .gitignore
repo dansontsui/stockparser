@@ -176,6 +176,7 @@ histock_original_data/
 histock_rebuild_data/
 histock_original_data/20210314/
 histock_rebuild_data/
+venv/
 
 # Publish Web Output
 *.[Pp]ublish.xml

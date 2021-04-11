@@ -135,11 +135,11 @@ stockid = '6142'
 #stockid = '8299'
 #for dc in range(19,-1,-1):
 
-startdate = dt.datetime(2021,1,1)
-enddate = dt.datetime(2021, 3,26)
+startdate = dt.datetime(2021,3,31)
+#enddate = dt.datetime(2021, 3,29)
 
 #startdate = dt.datetime.today()
-#enddate = dt.datetime.today()
+enddate = dt.datetime.today()
 
 totaldays = (enddate - startdate).days + 1
 

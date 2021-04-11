@@ -86,7 +86,7 @@ def load_broker_id_from_csv():
     return df
 
 #03-11 18:21:13 - Log.Parser - INFO 
-#import dump_fubon_html_to_major_csv_twse
+import dump_fubon_html_to_major_csv_twse
 
 logger = logging.getLogger('Log.Parser')
 logger.setLevel(logging.DEBUG)
@@ -136,10 +136,10 @@ pattern = re.compile("[A-Za-z]+")
 stockid = '8299'
 #for dc in range(19,-1,-1):
 
-#startdate = dt.datetime(2021,3,19)
-#enddate = dt.datetime(2021, 3,21)
+startdate = dt.datetime(2021,3,31)
+#enddate = dt.datetime(2021, 3,30)
 
-startdate = dt.datetime.today()
+#startdate = dt.datetime.today()
 enddate = dt.datetime.today()
 
 totaldays = (enddate - startdate).days + 1
