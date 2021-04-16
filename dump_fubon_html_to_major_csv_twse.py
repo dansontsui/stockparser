@@ -61,6 +61,7 @@ def save_oridata_form_fubon(folder_twday,findBrokName,mainid,subid,sdate,sotckid
         'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',
         'Cookie':'gr_user_id=1f9ea7ea-462a-4a6f-9d55-156631fc6d45; bid=vPYpmmD30-k; ll="118282"; ue="codin; __utmz=30149280.1499577720.27.14.utmcsr=douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/doulist/240962/; __utmv=30149280.3049; _vwo_uuid_v2=F04099A9dd; viewed="27607246_26356432"; ap=1; ps=y; push_noty_num=0; push_doumail_num=0; dbcl2="30496987:gZxPfTZW4y0"; ck=13ey; _pk_ref.100001.8cb4=%5B%22%22%2C%22%22%2C1515153574%2C%22https%3A%2F%2Fbook.douban.com%2Fmine%22%5D; __utma=30149280.833870293.1473539740.1514800523.1515153574.50; __utmc=30149280; _pk_id.100001.8cb4=255d8377ad92c57e.1473520329.20.1515153606.1514628010.'
     }
+    
     url = 'http://fubon-ebrokerdj.fbs.com.tw/z/zc/zco/zco0/zco0.djhtm?A='+sotckid+'&BHID='+mainid+'&b='+subid+'&C=1&D='+sdate+'&E='+sdate+'&ver=V3'
     #url = 'https://fubon-ebrokerdj.fbs.com.tw/z/zg/zgb/zgb0.djhtm?a='+mainid+'&b='+subid+'&c=E&e='+sdate+'&f='+sdate
     r = requests.get(url,headers = headers)
@@ -131,15 +132,36 @@ pattern = re.compile("[A-Za-z]+")
 
 # if found match (entire string matches pattern)
 #a = str(df.代號[r])
-stockid = '6142'
+stockid = '2892'
+s = None
+import pickle
+import datetime
 #stockid = '8299'
 #for dc in range(19,-1,-1):
+date_range_record_file = dbname = 'db/'+stockid+'_database_1.csv'
+DataFrameDb = None
 
-startdate = dt.datetime(2021,3,31)
-#enddate = dt.datetime(2021, 3,29)
+#if not os.path.isfile(date_range_record_file):
+#    dbname = 'db/'+stockid+'_database_1.csv'
+#    if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
+#        DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
+#        DataFrameDb.index = pd.to_datetime(pd.Series(DataFrameDb['日期']))
+#        DataFrameDb.to_pickle(date_range_record_file)
+#else:
+#    DataFrameDb = pd.read_pickle(date_range_record_file)
+DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
+s = DataFrameDb.tail(1)
+startdate = pd.to_datetime((s.iloc[0]['日期']))
+
+#if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
+#    DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
+#    DataFrameDb.index = pd.to_datetime(pd.Series(DataFrameDb['日期']))
+
+#startdate = dt.datetime(2020,12,1)
+enddate = dt.datetime.today()
 
 #startdate = dt.datetime.today()
-enddate = dt.datetime.today()
+#enddate = dt.datetime.today()
 
 totaldays = (enddate - startdate).days + 1
 
@@ -193,12 +215,9 @@ for daynumber in range(totaldays):
     mainBrokName = ''
     findBrokName = ''
 
-    dbname = 'db/'+stockid+'_database_1.csv'
-    DataFrameDb = None
+
    
-    if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
-        DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
-    
+
     for r in range(0,row):#每一家證券公司
         print(folder_twday + ">> " + str(r) + "/" + str(row))
         if df.代號[r][3]=='0' and (df.代號[r][2]>='0' and df.代號[r][2]<='9'):
