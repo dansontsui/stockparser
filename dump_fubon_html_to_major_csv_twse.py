@@ -132,32 +132,41 @@ pattern = re.compile("[A-Za-z]+")
 
 # if found match (entire string matches pattern)
 #a = str(df.代號[r])
-stockid = '2892'
+stockid = '6142'
 s = None
 import pickle
 import datetime
 #stockid = '8299'
 #for dc in range(19,-1,-1):
 date_range_record_file = dbname = 'db/'+stockid+'_database_1.csv'
+#date_range_record_file = dbname = 'db/'+stockid+'.pkl'
 DataFrameDb = None
 
-#if not os.path.isfile(date_range_record_file):
-#    dbname = 'db/'+stockid+'_database_1.csv'
-#    if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
-#        DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
-#        DataFrameDb.index = pd.to_datetime(pd.Series(DataFrameDb['日期']))
-#        DataFrameDb.to_pickle(date_range_record_file)
-#else:
-#    DataFrameDb = pd.read_pickle(date_range_record_file)
-DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
-s = DataFrameDb.tail(1)
-startdate = pd.to_datetime((s.iloc[0]['日期']))
+if not os.path.isfile(date_range_record_file):
+    dbname = 'db/'+stockid+'_database_1.csv'
+    if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
+        DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
+        DataFrameDb.index = pd.to_datetime(pd.Series(DataFrameDb['日期']))
+        DataFrameDb.to_pickle(date_range_record_file)
+else:
+    #DataFrameDb = pd.read_pickle(date_range_record_file)
+    DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
+    #DataFrameDb.index = pd.to_datetime(pd.Series(DataFrameDb['日期']))
+    #DataFrameDb = pd.read_csv(dbname)
+    
+#DataFrameDb.to_csv(dbname,encoding='utf-8')
+#DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
+if DataFrameDb is not None:
+    s = DataFrameDb.tail(1)
+    startdate = pd.to_datetime((s.iloc[0]['日期']))
+else:
+    startdate = dt.datetime(2020,11,1) 
 
 #if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
 #    DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
 #    DataFrameDb.index = pd.to_datetime(pd.Series(DataFrameDb['日期']))
 
-#startdate = dt.datetime(2020,12,1)
+#startdate = dt.datetime(2021,4,15)
 enddate = dt.datetime.today()
 
 #startdate = dt.datetime.today()

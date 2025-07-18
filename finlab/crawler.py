@@ -17,6 +17,8 @@ from requests.exceptions import ReadTimeout
 import ipywidgets as widgets
 import pip
 import pandas
+import gc
+import shutil
 
 
 
@@ -25,7 +27,7 @@ def import_or_install(package):
         __import__(package)
     except ImportError:
         print('Please install lxml(pip install lxml)')
-        
+
     # try:
     #     versions = [int(i) for i in pandas.__version__.split('.')]
     #     assert (versions[0] == 1) & (versions[1] >= 1) & (versions[2] >= 4)
@@ -315,7 +317,7 @@ def find_best_session():
             # print('獲取新的Session 第', i, '回合')
             headers = generate_random_header()
             ses = requests.Session()
-            ses.get('https://www.twse.com.tw/zh/', headers=headers, timeout=10)
+            ses.get('https://www.twse.com.tw/zh/', headers=headers, timeout=10,verify=False)
             ses.headers.update(headers)
             # print('成功！')
             return ses
@@ -416,7 +418,8 @@ def crawl_capital():
     time.sleep(10)
     res = requests_get('https://dts.twse.com.tw/opendata/t187ap03_O.csv')
     res.encoding = 'utf-8'
-    df = df.append(pd.read_csv(StringIO(res.text)))
+    #df = df.append(pd.read_csv(StringIO(res.text)))
+    df = pd.concat([df,pd.read_csv(StringIO(res.text))])
 
     df['date'] = pd.to_datetime(str(datetime.datetime.now().year) + df['出表日期'].str[3:])
     df.set_index([df['公司代號'].astype(str) + ' ' + df['公司簡稱'].astype(str), 'date'], inplace=True)
@@ -433,7 +436,8 @@ def interest():
 
     res = requests_get('https://www.tpex.org.tw/web/stock/exright/preAnnounce/prepost_result.php?l=zh-tw&o=data')
     res.encoding = 'utf-8'
-    df = df.append(pd.read_csv(StringIO(res.text)))
+    #df = df.append(pd.read_csv(StringIO(res.text)))
+    df = pd.concat([df,pd.read_csv(StringIO(res.text))])
 
     df['date'] = df['除權息日期'].str.replace('年', '/').str.replace('月', '/').str.replace('日', '')
     df['date'] = pd.to_datetime(str(datetime.datetime.now().year) + df['date'].str[3:])
@@ -553,7 +557,7 @@ def month_revenue(name, date):
         return pd.DataFrame()
 
     df = pd.concat([df for df in dfs if df.shape[1] <= 11 and df.shape[1] > 5])
-
+    df = df.rename(columns={"公司 代號": "公司代號"})
     if 'levels' in dir(df.columns):
         df.columns = df.columns.get_level_values(1)
     else:
@@ -563,6 +567,8 @@ def month_revenue(name, date):
 
     df = df.loc[:,~df.columns.isnull()]
     df = df.loc[~pd.to_numeric(df['當月營收'], errors='coerce').isnull()]
+
+    
     df = df[df['公司代號'] != '合計']
     df = combine_index(df, '公司代號', '公司名稱')
     df = preprocess(df, datetime.date(date.year, date.month, 10))
@@ -821,20 +827,22 @@ def merge(twe, otc, t2o):
     t2o2 = {k:v for k,v in t2o.items() if k in otc.columns}
     otc = otc[list(t2o2.keys())]
     otc = otc.rename(columns=t2o2)
-    twe = twe[otc.columns & twe.columns]
-
-    return twe.append(otc)
+    #twe = twe[otc.columns & twe.columns]
+    twe = twe[twe.columns.intersection(otc.columns)]
+    #return twe.append(otc)
+    return  pd.concat([twe,otc])
 
 
 def crawl_price(date):
 
     df=crawl_gitlab_backup('price',date)
+    #print(1,df)
 
     if df is not None:
         return df
 
     dftwe = price_twe(date)
-    time.sleep(5)
+    time.sleep(2)
     dfotc = price_otc(date)
     if len(dftwe) != 0 and len(dfotc) != 0:
         df = merge(dftwe, dfotc, o2tp)
@@ -846,7 +854,6 @@ def crawl_price(date):
 def crawl_bargin(date):
 
     df=crawl_gitlab_backup('bargin',date)
-
     if df is not None:
         return df
 
@@ -927,11 +934,13 @@ def update_table(table_name, crawl_function, dates):
                 dfs = {i:pd.DataFrame() for i in data.keys()}
 
             for i, d in data.items():
-                dfs[i] = dfs[i].append(d)
+                #dfs[i] = dfs[i].append(d)
+                dfs[i] = pd.concat([dfs[i],d])
 
         # update single dataframe
         else:
-            df = df.append(data)
+            #df = pd.concat df.append(data)
+            df = pd.concat([df,data])
             print('  ✅')
 
         time.sleep(10)
@@ -953,16 +962,22 @@ from dateutil.relativedelta import relativedelta
 
 def check_monthly_revenue():
 
-    df = pd.read_pickle("history/tables/monthly_report.pkl")
-
-    if df.loc['1101 台泥', '2017-10-10']['當月營收'] == '8387381':
-        print("fix monthly report errors")
-        df = df.reset_index()
-        df['date'] = [d + relativedelta(months=1) for d in df['date']]
-        df.set_index(['stock_id', 'date'], inplace=True)
-        df.to_pickle("history/tables/monthly_report.pkl")
-        print("done")
-        commit("monthly_report")
+    if os.path.exists("history/tables/monthly_report.pkl"):
+        df = pd.read_pickle("history/tables/monthly_report.pkl")
+    else:
+        return 
+    try:
+        if df.loc['1101 台泥', '2017-10-10']['當月營收'] == '8387381':
+            print("fix monthly report errors")
+            df = df.reset_index()
+            df['date'] = [d + relativedelta(months=1) for d in df['date']]
+            df.set_index(['stock_id', 'date'], inplace=True)
+            df.to_pickle("history/tables/monthly_report.pkl")
+            print("done")
+            commit("monthly_report")
+    except Exception as e:
+        print(e)
+    
 
 import pickle
 def to_pickle(df, name):
@@ -983,11 +998,28 @@ def to_pickle(df, name):
         check_monthly_revenue()
 
     if os.path.isfile(fname):
-        old_df = pd.read_pickle(fname)
-        old_df = old_df.append(df, sort=False)
 
-        old_df = old_df[~old_df.index.duplicated(keep='last')]
-        old_df = old_df.sort_index()
+        print('read pickle')
+        old_df = pd.read_pickle(fname)
+        gc.collect()
+
+        print('append pickle')
+        #old_df = old_df.append(df, sort=False)
+        #old_df = old_df.append(df)
+        old_df = pd.concat([old_df,df])
+        gc.collect()
+
+        print('remove duplicates')
+        old_df.reset_index(inplace=True)
+        old_df.drop_duplicates(['stock_id', 'date'], inplace=True)
+        old_df.set_index(['stock_id', 'date'], inplace=True)
+        gc.collect()
+
+        print('sort index')
+        old_df.sort_index(inplace=True)
+        gc.collect()
+
+        print('save pickle')
         old_df.to_pickle(newfname)
         os.remove(fname)
         os.rename(newfname, fname)
@@ -999,9 +1031,12 @@ def to_pickle(df, name):
     if not os.path.isfile(date_range_record_file):
         pickle.dump({}, open(date_range_record_file, 'wb'))
 
+    print('save date')
     dates = pickle.load(open(date_range_record_file, 'rb'))
     dates[name] = (old_df.index.levels[1][0], old_df.index.levels[1][-1])
     pickle.dump(dates, open(date_range_record_file, 'wb'))
+    del old_df
+    gc.collect()
 
     commit(name)
 
@@ -1324,7 +1359,7 @@ def patch2019(df):
 
 def read_html2019(file):
     dfs = pd.read_html(file)
-    return [pd.DataFrame(), patch2019(dfs[0]), patch2019(dfs[1]), patch2019(dfs[2])]
+    return [pd.DataFrame(), patch2019(dfs[0].astype(str)), patch2019(dfs[1].astype(str)), patch2019(dfs[2].astype(str))]
 
 
 import re
@@ -1445,7 +1480,9 @@ def combine(d):
 
     for i, dfs in d.items():
         for tname in tnames:
-            tbs[tname] = tbs[tname].append(dfs[tname])
+            #tbs[tname] = tbs[tname].append(dfs[tname])
+            tbs[tname] = pd.concat([tbs[tname],dfs[tname]])
+
     return tbs
 
 
@@ -1479,7 +1516,7 @@ def fill_season4(tbs):
 
         if len(df3) == 0:
             continue
-            
+
         # calculate the differences of income_sheet_cumulate to get income_sheet single season
         diff = df4 - df3
         diff = diff.drop(['date'], axis=1)[overlap_columns]
@@ -1495,14 +1532,19 @@ def fill_season4(tbs):
         income_sheet = income_sheet.append(diff)
 
     # 排序好並更新tbs
-    income_sheet = income_sheet.reset_index().sort_values(['stock_id', 'date']).set_index(['stock_id', 'date'])
-    tbs['income_sheet'] = income_sheet
+    income_sheet.reset_index(inplace=True)
+    income_sheet.sort_values(['stock_id', 'date'], inplace=True)
+    income_sheet.set_index(['stock_id', 'date'], inplace=True)
+    return income_sheet
 
 def to_db(tbs):
 
     for i, df in tbs.items():
-        df = df.reset_index().sort_values(['stock_id', 'date']).drop_duplicates(['stock_id', 'date']).set_index(['stock_id', 'date'])
-        df.to_pickle(os.path.join('history', 'tables', i + '.pkl'))
+        (df.reset_index()
+             .sort_values(['stock_id', 'date'])
+             .drop_duplicates(['stock_id', 'date'])
+             .set_index(['stock_id', 'date'])
+             .to_pickle(os.path.join('history', 'tables', i + '.pkl')))
 
     if not os.path.isfile(date_range_record_file):
         pickle.dump({}, open(date_range_record_file, 'wb'))
@@ -1515,10 +1557,20 @@ def to_db(tbs):
 def html2db(year, season):
 
     pack_htmls(year, season, os.path.join('history', 'financial_statement', str(year) + str(season)))
+    gc.collect()
     d = get_all_pickles(os.path.join('history', 'financial_statement'))
+    gc.collect()
+
     tbs = combine(d)
-    fill_season4(tbs)
+    del d
+    gc.collect()
+
+    tbs['income_sheet'] = fill_season4(tbs)
+    gc.collect()
+
     to_db(tbs)
+    gc.collect()
+
     return {}
 
 def crawl_finance_statement_by_date(date):
@@ -1550,11 +1602,6 @@ def crawl_finance_statement_by_date(date):
     return {}
 
 
-import os
-import gc
-import shutil
-import pandas as pd
-import numpy as np
 
 def commit(*commit_tables):
 
@@ -1572,6 +1619,8 @@ def commit(*commit_tables):
 
     for fname, tname in zip(fnames, tnames):
 
+        gc.collect()
+
         if tname not in commit_tables:
             continue
 
@@ -1580,7 +1629,10 @@ def commit(*commit_tables):
 
         fdir = os.path.join(fitems, tname)
 
-        if os.path.isdir(fdir) and os.path.getmtime(fname) < os.path.getmtime(fdir):
+        if (os.path.isdir(fdir) and
+            os.path.getmtime(fname) < os.path.getmtime(fdir) and
+            len(os.listdir(fdir)) != 0):
+
             print("已經成功commit過", tname, "了，跳過！")
             continue
 
@@ -1604,7 +1656,7 @@ def commit(*commit_tables):
             gc.collect()
             df['stock_id'] = df['stock_id'].apply(lambda s:s[:s.index(' ')])
 
-
+        print(tname)
         df.set_index(['stock_id', 'date'], inplace=True)
 
         # select 4 digit stock ids
@@ -1616,11 +1668,13 @@ def commit(*commit_tables):
         if tname == 'monthly_report':
             check_monthly_revenue()
 
-        df = df.apply(lambda s: pd.to_numeric(s, errors='coerce'))
+        if str(set(df.dtypes)) != "{dtype('float64')}":
+            df = df.apply(lambda s: pd.to_numeric(s, errors='coerce'))
         gc.collect()
 
-        df[df == 0] = np.nan
-
+        if tname != 'benchmark':
+            df[df == 0] = np.nan
+        gc.collect()
 
         df = df[~df.index.duplicated(keep='first')]
         gc.collect()
@@ -1628,17 +1682,23 @@ def commit(*commit_tables):
         items = list(df.columns)
         df.reset_index(inplace=True)
 
-        df = df.pivot("date", "stock_id")
-        gc.collect()
+        if tname != 'benchmark':
 
-        for name, (_, series) in zip(items, df.items()):
+            df = df.pivot(index = "date", columns="stock_id")
+            gc.collect()
 
-            print(tname, '--', name)
-            fitem = os.path.join(fdir, name.replace('+', '_').replace('/', '_'))
-            #series.reset_index()\
-            #    .pivot("date", "stock_id")[name].to_pickle(fitem + '.pkl')
-            df[name].to_pickle(fitem + '.pkl')
+            for name, (_, series) in zip(items, df.items()):
 
+                print(tname, '--', name)
+                fitem = os.path.join(fdir, name.replace('+', '_').replace('/', '_'))
+                #series.reset_index()\
+                #    .pivot("date", "stock_id")[name].to_pickle(fitem + '.pkl')
+                df[name].to_pickle(fitem + '.pkl')
+        else:
+            for name in items:
+                print(tname, '--', name)
+                fitem = os.path.join(fdir, name.replace('+', '_').replace('/', '_'))
+                df[["date", "stock_id", name]].reset_index().pivot("date", "stock_id")[name].to_pickle(fitem + '.pkl')
 
 import urllib.request
 import pickle
@@ -1659,9 +1719,9 @@ def crawl_gitlab_backup(target: str, date=None):
             date_str = date.strftime('%Y%m')
 
     if target in crawlers_once_list:
-        url = f'https://class.finlab.tw/data/{target}/{target}.pickle?inline=false'
+        url = f'https://github.com/finlab-python/tw_stock_class/raw/master/data/{target}/{target}.pickle?inline=false'
     else:
-        url = f'https://class.finlab.tw/data/{target}/{date_str}.pickle?inline=false'
+        url = f'https://github.com/finlab-python/tw_stock_class/raw/master/data/{target}/{date_str}.pickle?inline=false'
     try:
         res = requests.get(url, headers=headers)
         df = pd.read_pickle(BytesIO(res.content))

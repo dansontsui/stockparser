@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import datetime
 import numpy as np
-from talib import abstract
+#from talib import abstract
 from .crawler import check_monthly_revenue
 
 class Data():

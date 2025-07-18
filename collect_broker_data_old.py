@@ -1,0 +1,275 @@
+import pandas as pd
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+import numpy as np
+from datetime import datetime
+import time
+import gc
+from datetime import date, timedelta
+
+
+import warnings
+warnings.filterwarnings("ignore")
+import finlab.crawler as cr
+
+headers = cr.generate_random_header()
+
+def fixdatastring_from_web(dfa):
+    for idx in dfa.index:
+        str1 = dfa['券商名稱'][idx]
+        ss = str1.replace('<!-- \tGenLink2stk','').replace("('","").replace("'","").replace("); //-->","").replace("AS","")
+        d = ss.split(',')
+        if len(d) == 2:
+            dfa['stockid'][idx]=d[0]
+            dfa['券商名稱'][idx]=d[1]
+        else:
+            dfa['券商名稱'][idx]=d[0]
+
+
+    dfa = dfa[dfa['券商名稱'].isnull() == False]
+    dfa = dfa[dfa['券商名稱']!='無此券商分點交易資料' ]
+
+    dfa.reset_index(inplace= True,drop=True)
+    dfa['買進張數'] = dfa['買進張數'].astype(int)
+    dfa['差額'] = dfa['差額'].astype(int)
+    dfa['賣出張數'] = dfa['賣出張數'].astype(int)
+
+    return dfa
+
+def MakeBroidData():
+
+    df = pd.read_csv('broker_id.csv',encoding='big5')
+    '''
+    df=pd.read_csv('broker_id.csv',encoding='utf-8',sep='\\s+')
+    df['subBroderId'] = ''
+    df['MainBroder'] = 'N'
+
+    for bdidx in df.index:
+        s1 = df['證券商名稱'][bdidx].split('-')
+        if len(s1) == 2:
+            df['證券商名稱'][bdidx]=s1[0]
+            df['subBroderId'][bdidx]=s1[1]
+        else:
+            df['MainBroder'][bdidx] = 'Y'
+            df['subBroderId'][bdidx]=s1[0]
+    '''
+    return df
+
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(n)
+
+def loadBrokerPikle(Mborkerid):
+    try:
+        fullsell = pd.read_pickle(f'.\\broker\\broker_sell_{Mborkerid}.pkl')
+    except Exception as e:
+        fullsell = None
+
+    try:
+        fullbuy = pd.read_pickle(f'.\\broker\\broker_buy_{Mborkerid}.pkl')
+    except Exception as e:
+        fullbuy = None
+
+
+    return fullbuy,fullsell
+
+import os
+def saveBrokerPikle(fullbuy,fullsell,Mborkerid):
+    try:
+        if os.path.isfile(f'.\\broker\\broker_sell_{Mborkerid}.pkl'):
+            fs = pd.read_pickle(f'.\\broker\\broker_sell_{Mborkerid}.pkl')
+            fb = pd.read_pickle(f'.\\broker\\broker_buy_{Mborkerid}.pkl')
+            fb = fb.append(fullbuy)
+            fs = fs.append(fullsell)
+            fb=fb.sort_index()
+            fs=fs.sort_index()
+            fb.to_pickle(f'.\\broker\\broker_buy_{Mborkerid}.pkl')
+            fs.to_pickle(f'.\\broker\\broker_sell_{Mborkerid}.pkl')
+        else:
+            fullbuy.to_pickle(f'.\\broker\\broker_buy_{Mborkerid}.pkl')
+            fullsell.to_pickle(f'.\\broker\\broker_sell_{Mborkerid}.pkl')
+
+
+    except Exception as e:
+        fullbuy = None
+        fullsell = None
+    return fullbuy,fullsell
+
+
+def saveBrokerCsv(fullbuy,fullsell,Mborkerid):
+    try:
+        if os.path.isfile(f'.\\broker\\broker_sell_{Mborkerid}.csv'):
+            fs = pd.read_csv(f'.\\broker\\broker_sell_{Mborkerid}.csv')
+            fb = pd.read_csv(f'.\\broker\\broker_buy_{Mborkerid}.csv')
+            fb = fb.append(fullbuy)
+            fs = fs.append(fullsell)
+            fb=fb.sort_index()
+            fs=fs.sort_index()
+            fb.to_csv(f'.\\broker\\broker_buy_{Mborkerid}.csv',index=False)
+            fs.to_csv(f'.\\broker\\broker_sell_{Mborkerid}.csv',index=False)
+        else:
+            fullbuy.to_csv(f'.\\broker\\broker_buy_{Mborkerid}.csv',index=False)
+            fullsell.to_csv(f'.\\broker\\broker_sell_{Mborkerid}.csv',index=False)
+
+
+    except Exception as e:
+        fullbuy = None
+        fullsell = None
+    return fullbuy,fullsell    
+
+
+#fullbuy,fullsell= loadBrokerPikle()
+'''
+s = fullsell['date']
+s = s.dropna()
+start_date = max(s)
+start_date  = start_date + timedelta(days=1)
+
+start_date = date(2022, 3, 1)
+end_date = datetime.now().date()
+'''
+
+
+borkerdf=MakeBroidData()
+
+Mborkerdfidx = borkerdf[borkerdf['MainBroder'] == 'Y']
+
+totalcnt = len(borkerdf)
+startcnt = 0
+#find
+#Mborkerdfidx = Mborkerdfidx[Mborkerdfidx['代號'] == '9800']
+
+for Mborkeridx in Mborkerdfidx.index:
+    fullbuy = None
+    fullsell = None
+    gc.collect()
+    Mborkerid = Mborkerdfidx['代號'][Mborkeridx]
+
+
+    subBrokerid = borkerdf[borkerdf['證券商名稱'] ==  Mborkerdfidx['證券商名稱'][Mborkeridx]]
+    fullbuy,fullsell= loadBrokerPikle(Mborkerid)
+    for subbrokerIdidx in subBrokerid.index:
+        if subBrokerid['subBroderId'][subbrokerIdidx] == subBrokerid['證券商名稱'][subbrokerIdidx]:
+            subborkerid = Mborkerid
+        else:
+            subborkerid = subBrokerid['代號'][subbrokerIdidx]
+        log = f"get {Mborkerid} - {subborkerid} "            
+        print(log)
+        if borkerdf['valid'][subbrokerIdidx] == 'N':
+            #print(borkerdf['代號'] + 'is N')
+            continue            
+        fst = os.path.isfile(f'.\\broker\\broker_sell_{Mborkerid}.pkl')
+        fbt = os.path.isfile(f'.\\broker\\broker_buy_{Mborkerid}.pkl')
+        if (isinstance(fullbuy,pd.DataFrame) == False and fbt==True) or (isinstance(fullsell,pd.DataFrame) == False and fst==True) :
+            print('make Error N')
+            borkerdf['valid'][subbrokerIdidx] = 'N'
+            borkerdf.to_csv('broker_id.csv',index=False,encoding='big5',errors='ignore')
+            continue
+            
+        if isinstance(fullbuy,pd.DataFrame) == True and len(fullbuy) >0:
+            #s = fullsell[fullsell['mainBroker'] ==Mborkerid and fullsell['subBroker'] ==subborkerid]
+            s = fullsell.query(f"mainBroker =='{Mborkerid}' and subBroker=='{subborkerid}'")
+            if len(s) > 0:
+                s = s['date']
+                start_date = max(s)
+                start_date  = start_date + timedelta(days=1)
+            else:
+                start_date = date(2022, 3, 1)
+        else:
+            start_date = date(2022, 3, 1)
+        end_date = datetime.now().date()
+        #end_date =date(2022, 3, 2)
+        #log = f"get {Mborkerid} - {subborkerid} "
+        startcnt +=1
+        fullbuy_t = None
+        fullsell_t = None
+        gc.collect()
+        #print(log)
+        for single_date in daterange(start_date, end_date):
+
+            time.sleep(0.3)
+            datestr = single_date.strftime("%Y-%m-%d")
+            log = f">>> date={datestr}  - {str(startcnt)}/{str(totalcnt)}"
+            print(log)
+            #datestr = "2023-2-1"
+            session = requests.Session()
+            retry = Retry(connect=3, backoff_factor=0.5)
+            adapter = HTTPAdapter(max_retries=retry)
+            session.mount('http://', adapter)
+            session.mount('https://', adapter)
+            
+            #Mborkerid = '9800'
+            #subborkerid = '9800'
+            #datestr = '2022-08-12'
+            #r = requests.get(url,headers = headers)
+            url = f'https://fubon-ebrokerdj.fbs.com.tw/z/zg/zgb/zgb0.djhtm?a={Mborkerid}&b={subborkerid}&c=E&e={datestr}&f={datestr}'
+            r = session.get(url,headers = headers,verify= False)
+            try:
+                df = pd.read_html(r.text)
+            except Exception as e:
+                print(str(e))
+                continue
+            
+            dfbuy = pd.DataFrame(df[3])
+            dfbuy.drop(index=0,axis=0,inplace=True)
+            dfbuy.rename(columns={0:dfbuy[0][1],1:dfbuy[1][1],2:dfbuy[2][1],3:dfbuy[3][1]},inplace=True)
+            dfbuy.drop(index=1,axis=0,inplace=True)
+            dfbuy.reset_index(drop=True,inplace=True)
+            dfbuy['stockid']=''
+            dfbuy['mainBroker'] = Mborkerid
+            dfbuy['subBroker'] = subborkerid
+            dfbuy['date'] = datetime.strptime(datestr,'%Y-%m-%d').date()
+
+            dfsell = pd.DataFrame(df[4])
+            dfsell.drop(index=0,axis=0,inplace=True)
+            dfsell.rename(columns={0:dfsell[0][1],1:dfsell[1][1],2:dfsell[2][1],3:dfsell[3][1]},inplace=True)
+            dfsell.drop(index=1,axis=0,inplace=True)
+            dfsell.reset_index(drop=True,inplace=True)
+            dfsell['stockid']=''
+            dfsell['mainBroker'] = Mborkerid
+            dfsell['subBroker'] = subborkerid
+            dfsell['date'] = datetime.strptime(datestr,'%Y-%m-%d').date()
+
+            dfsell = fixdatastring_from_web(dfsell)
+            dfbuy = fixdatastring_from_web(dfbuy)
+
+            #dfsell = dfbuy.set_index(['stockid','date'])
+            #dfbuy = dfbuy.set_index(['stockid','date'])
+
+
+
+            if isinstance(fullbuy_t,pd.DataFrame) == False:
+                fullbuy_t = pd.DataFrame(columns=dfbuy.columns,index=dfbuy.index)
+                fullbuy_t=fullbuy_t.dropna()
+                fullsell_t = pd.DataFrame(columns=dfbuy.columns,index=dfbuy.index)
+                fullsell_t=fullsell_t.dropna()
+            if len(dfbuy) > 0:
+                fullbuy_t = fullbuy_t.append(dfbuy)
+            else:
+                test=1
+            if len(dfsell) > 0:
+                fullsell_t = fullsell_t.append(dfsell)
+            
+        
+        if isinstance(fullbuy_t,pd.DataFrame) == False:
+            continue
+        fullbuy_t = fullbuy_t.reset_index(drop=True)
+        fullsell_t = fullsell_t.reset_index(drop=True)
+        
+        if len(fullbuy_t) > 0 or len(fullsell_t) > 0:
+            borkerdf['valid'][subbrokerIdidx] = 'Y'
+            borkerdf.to_csv('broker_id.csv',index=False,encoding='big5',errors='ignore')
+            saveBrokerPikle(fullbuy_t,fullsell_t,Mborkerid)
+        else:
+            print('make N')
+            borkerdf['valid'][subbrokerIdidx] = 'N'
+            borkerdf.to_csv('broker_id.csv',index=False,encoding='big5',errors='ignore')
+        fullbuy,fullsell= loadBrokerPikle(Mborkerid)
+        if isinstance(fullbuy,pd.DataFrame) == False:
+            print('error')
+        if isinstance(fullsell,pd.DataFrame) == False:
+            print('error')            
+        #fullbuy.to_pickle(f'.\\broker\\broker_buy_{Mborkerid}.pkl')
+        #fullsell.to_pickle(f'.\\broker\\broker_sell_{Mborkerid}.pkl')

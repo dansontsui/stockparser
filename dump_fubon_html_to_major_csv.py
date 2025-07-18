@@ -85,8 +85,10 @@ def load_broker_id_from_csv():
     df=pd.read_csv('broker_id.csv',encoding='utf-8',sep='\\s+')
     return df
 
-#03-11 18:21:13 - Log.Parser - INFO 
-import dump_fubon_html_to_major_csv_twse
+#load twse sotck
+#import datetime
+#sdate = '2021-4-15 00:00:00'
+#d = datetime(2021,4,15)
 
 logger = logging.getLogger('Log.Parser')
 logger.setLevel(logging.DEBUG)
@@ -135,8 +137,28 @@ pattern = re.compile("[A-Za-z]+")
 #stockid = '6142'
 stockid = '8299'
 #for dc in range(19,-1,-1):
+date_range_record_file = dbname = 'db/'+stockid+'_database_1.csv'
+DataFrameDb = None
 
-startdate = dt.datetime(2021,3,31)
+if not os.path.isfile(date_range_record_file):
+    dbname = 'db/'+stockid+'_database_1.csv'
+    if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
+        DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
+        DataFrameDb.index = pd.to_datetime(pd.Series(DataFrameDb['日期']))
+        DataFrameDb.to_pickle(date_range_record_file)
+else:
+    #DataFrameDb = pd.read_pickle(date_range_record_file)
+    DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
+    #DataFrameDb.index = pd.to_datetime(pd.Series(DataFrameDb['日期']))
+    #DataFrameDb = pd.read_csv(dbname)
+    
+#DataFrameDb.to_csv(dbname,encoding='utf-8')
+#DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
+s = DataFrameDb.tail(1)
+startdate = pd.to_datetime((s.iloc[0]['日期']))
+
+
+#startdate = dt.datetime(2021,3,31)
 #enddate = dt.datetime(2021, 3,30)
 
 #startdate = dt.datetime.today()
@@ -194,10 +216,10 @@ for daynumber in range(totaldays):
     findBrokName = ''
 
     dbname = 'db/'+stockid+'_database_1.csv'
-    DataFrameDb = None
+    #DataFrameDb = None
    
-    if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
-        DataFrameDb = pd.read_csv(dbname,encoding='utf-8')
+    #if Build_fubon_data_to_my_db.check_db_file_exist(dbname) == True: #file exist
+    #    DataFrameDb = pd.read_csv(dbname,encoding='utf-16')
     
     for r in range(0,row):#每一家證券公司
         print(folder_twday + ">> " + str(r) + "/" + str(row))
@@ -241,6 +263,7 @@ for daynumber in range(totaldays):
                 continue
             if DataFrameDb is None:
                 DataFrameDb = Build_fubon_data_to_my_db.fubon_create_database(df1,findBrokName,dbname,twday,otc_rebuild_name,stockid)
+                #DataFrameDb.index = pd.to_datetime(pd.Series(DataFrameDb['日期']))
 
             Build_fubon_data_to_my_db.trans_data_to_db(DataFrameDb,df1,findBrokName,stockid,twday,otc_rebuild_name)
 
@@ -248,11 +271,11 @@ for daynumber in range(totaldays):
                 log.log('downloaded from internet ' + mainBrok+ '-' +subBrok)
                 #stime.sleep(1)
         except:
-            DataFrameDb.to_csv(dbname,encoding='utf-8',index=0)
+            DataFrameDb.to_csv(dbname,encoding='utf-16',index=0)
             log.log("exception"+','+folder_twday+','+checkfile+','+mainBrok +","+subBrok+","+twday)
     to1 = time.time() - to0
     log.log('test time'+str(to1))
-    DataFrameDb.to_csv(dbname,encoding='utf-8',index=0)
+    DataFrameDb.to_csv(dbname,encoding='utf-16',index=0)
 
 
     '''brokage_id_utf8 = a.encode("UTF-8")
@@ -262,5 +285,5 @@ for daynumber in range(totaldays):
         # if not found match
         print("No match")'''
 
-
+import dump_fubon_html_to_major_csv_twse
 #https://fubon-ebrokerdj.fbs.com.tw/z/zg/zgb/zgb0.djhtm?a=9800&b=0039003800310042

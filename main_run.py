@@ -104,7 +104,24 @@ def startParser_form_histock(sotckid):
 
 def startParser(sotckid):
     #load data form internet
-    r = requests.get('https://tw.stock.yahoo.com/d/s/major_8299.html')
+    
+    #r = requests.get('https://tw.stock.yahoo.com/d/s/major_8299.html',verify=False)
+
+    import requests
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
+
+
+    session = requests.Session()
+    retry = Retry(connect=3, backoff_factor=0.5)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    url = 'https://tw.stock.yahoo.com/d/s/major_8299.html'
+    r = session.get(url,verify= False)
+
+
+
     #parser html date
     s = re.findall(r"資料日期\S+.+",r.text)
     s1 = re.search(r"\d+\s+/\d+ /\d+",s[0])

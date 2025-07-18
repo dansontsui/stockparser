@@ -11,6 +11,7 @@ import log
 import logging
 import os
 import get_sotck_price
+import datetime
 gsclose=0
 gsrage=0
 gsopen=0
@@ -73,7 +74,6 @@ def fubon_append_data_to_database(brokagename,source_df,db_dataFrame,sdate,otcda
    
     return
 
-
 def fubon_append_today_row(db_dataFrame,source_DF,brokename,sdate):
     #db_dataFrame = pd.read_csv(dbname,encoding='utf-8')
     rowcount = db_dataFrame.shape[0]
@@ -82,10 +82,17 @@ def fubon_append_today_row(db_dataFrame,source_DF,brokename,sdate):
     appendcolumn =1
     if brokename in db_dataFrame.columns:
         appendcolumn = 0
-    for index,row in db_dataFrame.iterrows():
-        if str(row['日期']) == sdate:
-            appendrow = 0
+    #csv
+    #for index,row in db_dataFrame.iterrows():
+    #    if str(row['日期']) == sdate:
+    #        appendrow = 0
+    #pkl
+    #s = sdate.split('-')
 
+    #d = datetime.date(int(s[0]),int(s[1]),int(s[2]))
+    for index,row in db_dataFrame.iterrows():
+        if row['日期'] == sdate:
+            appendrow = 0
     datarow = []
     if appendcolumn == 1:
         for c in range(0,rowcount):

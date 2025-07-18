@@ -2,17 +2,12 @@
 
 # -*- coding: utf-8 -*-
 
-import csv
-import numpy as np
 import datetime as dt
 import pandas as pd
 from datetime import timedelta
-import httplib2
-from urllib.parse import urlencode
 import requests
 from io import StringIO
 import re
-import os
 
 def twdate(date):
     year  = date.year-1911

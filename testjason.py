@@ -106,7 +106,7 @@ def test_jason_and_rebuild_csv_from_histock_file(stockid,sdate):
 
 def save_oridata_form_histock(sotckid,sdate):
     #load data form internet
-    r = requests.get('https://histock.tw/stock/branch.aspx?no='+sotckid+'&from='+sdate+'&to='+sdate)
+    r = requests.get('https://histock.tw/stock/branch.aspx?no='+sotckid+'&from='+sdate+'&to='+sdate,verify=False)
     #parser html date
     '''
     s = re.findall(r"資料日期\S+.+",r.text)
@@ -175,7 +175,7 @@ def startParser(sotckid):
     
 if __name__ == '__main__':
     for j in range(1,31):
-        sdate = "202103{:02d}".format(j)
+        sdate = "202203{:02d}".format(j)
         save_oridata_form_histock('8299',sdate)
         try:
             test_jason_and_rebuild_csv_from_histock_file('8299',sdate)
