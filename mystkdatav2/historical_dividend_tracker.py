@@ -999,7 +999,56 @@ def main():
                 continue
 
             # 執行追蹤
-            tracker.track_historical_dividends(start_year_month)
+            print(f"🔄 開始執行配息追蹤...")
+            success = tracker.track_historical_dividends(start_year_month)
+
+            print(f"📊 配息追蹤結果: {'成功' if success else '失敗'}")
+
+            # 如果追蹤成功，自動生成統計報表
+            if success:
+                print(f"\n📊 配息追蹤成功，開始生成統計報表...")
+
+                # 檢查配息資料庫是否存在
+                if os.path.exists("dividend_database.xlsx"):
+                    print("✅ 找到配息資料庫")
+
+                    try:
+                        print("📊 導入統計模組...")
+                        from dividend_statistics import DividendStatistics
+
+                        print("📊 建立統計分析器...")
+                        stats = DividendStatistics()
+
+                        print("📊 執行統計分析...")
+                        stats_success = stats.generate_all_statistics()
+
+                        if stats_success:
+                            print("✅ 配息統計報表生成完成！")
+                            print("📁 請打開 dividend_database.xlsx 查看統計工作表:")
+                            print("   • 年度統計 - 按年份統計配息金額")
+                            print("   • 月度統計 - 按年月統計配息金額")
+                            print("   • 股票統計 - 按股票統計配息金額")
+                            print("   • 進階統計 - 各種統計指標")
+                        else:
+                            print("⚠️  統計報表生成失敗")
+
+                    except ImportError as e:
+                        print(f"❌ 統計模組導入失敗: {e}")
+                        print("💡 請檢查 dividend_statistics.py 檔案是否存在")
+                    except Exception as e:
+                        print(f"⚠️  統計報表生成失敗: {e}")
+                        print("💡 您可以手動執行: python dividend_statistics.py")
+                        import traceback
+                        traceback.print_exc()
+                else:
+                    print("❌ 配息資料庫不存在，無法生成統計報表")
+                    print("💡 請確認配息追蹤是否成功執行")
+            else:
+                print("⚠️  配息追蹤未成功，跳過統計報表生成")
+                print("💡 請檢查:")
+                print("   1. 網路連線是否正常")
+                print("   2. 庫存檔案是否存在")
+                print("   3. 起始年月格式是否正確")
 
         elif choice == "2":
             # 查看配息資料庫

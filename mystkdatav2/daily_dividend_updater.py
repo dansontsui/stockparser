@@ -67,8 +67,11 @@ class DailyDividendUpdater:
                 else:
                     self.log_message(f"⚠️  {last_year} 年配息更新無新記錄")
             
+            # 自動生成統計報表
+            self.generate_statistics()
+
             self.log_message("🎉 每日配息更新完成")
-            
+
         except Exception as e:
             self.log_message(f"❌ 每日配息更新失敗: {e}")
             import traceback
@@ -104,7 +107,32 @@ class DailyDividendUpdater:
                     
         except Exception as e:
             self.log_message(f"❌ 檢查更新結果失敗: {e}")
-    
+
+    def generate_statistics(self):
+        """生成配息統計報表"""
+        try:
+            self.log_message("📊 開始生成配息統計報表...")
+
+            # 檢查配息資料庫是否存在
+            if os.path.exists("dividend_database.xlsx"):
+                from dividend_statistics import DividendStatistics
+
+                stats = DividendStatistics()
+                success = stats.generate_all_statistics()
+
+                if success:
+                    self.log_message("✅ 配息統計報表生成完成")
+                    self.log_message("📁 統計工作表已更新到 dividend_database.xlsx")
+                else:
+                    self.log_message("⚠️  配息統計報表生成失敗")
+            else:
+                self.log_message("⚠️  配息資料庫不存在，跳過統計報表生成")
+
+        except ImportError as e:
+            self.log_message(f"❌ 統計模組導入失敗: {e}")
+        except Exception as e:
+            self.log_message(f"❌ 生成統計報表失敗: {e}")
+
     def setup_daily_schedule(self, update_time: str = "09:00"):
         """設定每日自動更新排程
         
@@ -137,7 +165,46 @@ class DailyDividendUpdater:
         """手動執行更新"""
         self.log_message("🔧 手動執行配息更新")
         self.daily_update()
-    
+
+        # 顯示統計摘要
+        self.show_statistics_summary()
+
+    def show_statistics_summary(self):
+        """顯示統計摘要"""
+        try:
+            if os.path.exists("dividend_database.xlsx"):
+                import pandas as pd
+
+                # 讀取配息記錄
+                df = pd.read_excel("dividend_database.xlsx", sheet_name="配息記錄")
+
+                if not df.empty:
+                    total_dividend = df['總配息收益'].sum()
+                    total_records = len(df)
+                    unique_stocks = df['股票代碼'].nunique()
+
+                    self.log_message("📊 配息統計摘要:")
+                    self.log_message(f"   總配息收益: {total_dividend:,.2f} 元")
+                    self.log_message(f"   配息記錄: {total_records} 筆")
+                    self.log_message(f"   投資股票: {unique_stocks} 檔")
+
+                    # 檢查是否有統計工作表
+                    excel_file = pd.ExcelFile("dividend_database.xlsx")
+                    stats_sheets = [s for s in excel_file.sheet_names if s != '配息記錄']
+
+                    if stats_sheets:
+                        self.log_message(f"   統計工作表: {', '.join(stats_sheets)}")
+                    else:
+                        self.log_message("   ⚠️  沒有統計工作表")
+
+                else:
+                    self.log_message("📊 配息資料庫為空")
+            else:
+                self.log_message("📊 配息資料庫不存在")
+
+        except Exception as e:
+            self.log_message(f"❌ 顯示統計摘要失敗: {e}")
+
     def show_recent_logs(self, days: int = 7):
         """顯示最近的日誌記錄
         

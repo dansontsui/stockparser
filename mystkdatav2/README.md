@@ -31,7 +31,7 @@ mystkdatav2/
 ├── setup_daily_updater.py           # 安裝設定工具
 ├── setup_windows_task.py            # Windows 工作排程設定
 ├── test_daily_updater.py            # 測試工具
-├── inventory.xlsx                    # 股票庫存檔案
+├── stock_inventory.xlsx              # 股票庫存檔案
 ├── dividend_database.xlsx           # 個人配息資料庫
 ├── dividend_records_YYYY.xlsx       # 年度配息資料
 ├── daily_dividend_update.log        # 執行日誌
