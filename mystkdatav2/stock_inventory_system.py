@@ -25,7 +25,7 @@ class StockInventorySystem:
             excel_file: Excel檔案路徑
         """
         self.excel_file = excel_file
-        self.inventory_sheet = "庫存"
+        self.inventory_sheet = "當前庫存"
         self.transaction_sheet = "交易歷史"
         
         # 初始化Excel檔案
@@ -348,8 +348,11 @@ class StockInventorySystem:
             print(f"持有股數: {row['持有股數']:,} 股")
             print(f"平均成本: {row['平均成本']:.2f} 元")
             print(f"總成本: {row['總成本']:,.2f} 元")
-            print(f"更新時間: {row['最後更新時間']}")
-            if row['備註']:
+            # 檢查是否有更新時間欄位
+            if '最後更新時間' in row.index:
+                print(f"更新時間: {row['最後更新時間']}")
+
+            if '備註' in row.index and row['備註']:
                 print(f"備註: {row['備註']}")
             print("-" * 40)
     
@@ -508,6 +511,86 @@ class StockInventorySystem:
         else:
             print("\n📦 重新索引後庫存為空")
 
+    def adjust_inventory(self, stock_code: str, target_quantity: int, price: float, note: str = "庫存調整"):
+        """
+        調整庫存到指定數量
+
+        Args:
+            stock_code: 股票代碼
+            target_quantity: 目標數量
+            price: 調整價格
+            note: 備註
+        """
+        if target_quantity < 0:
+            print("❌ 目標數量不能為負數")
+            return
+
+        if price <= 0:
+            print("❌ 調整價格必須大於0")
+            return
+
+        # 讀取當前庫存
+        df_inventory = self._read_inventory()
+
+        # 檢查股票是否存在
+        if df_inventory.empty:
+            current_quantity = 0
+            stock_name = input(f"請輸入股票 {stock_code} 的名稱: ").strip()
+            if not stock_name:
+                print("❌ 股票名稱不能為空")
+                return
+        else:
+            stock_row = df_inventory[df_inventory['股票代碼'] == stock_code]
+
+            if stock_row.empty:
+                current_quantity = 0
+                stock_name = input(f"請輸入股票 {stock_code} 的名稱: ").strip()
+                if not stock_name:
+                    print("❌ 股票名稱不能為空")
+                    return
+            else:
+                current_quantity = int(stock_row.iloc[0]['持有股數'])
+                stock_name = stock_row.iloc[0]['股票名稱']
+
+        # 計算差額
+        difference = target_quantity - current_quantity
+
+        print(f"\n📊 庫存調整分析:")
+        print(f"股票代碼: {stock_code}")
+        print(f"股票名稱: {stock_name}")
+        print(f"目前數量: {current_quantity:,} 股")
+        print(f"目標數量: {target_quantity:,} 股")
+        print(f"差額: {difference:+,} 股")
+
+        if difference == 0:
+            print("✅ 目前數量已經等於目標數量，無需調整")
+            return
+
+        # 確認調整
+        action = "買入" if difference > 0 else "賣出"
+        abs_difference = abs(difference)
+        total_amount = abs_difference * price
+
+        print(f"\n🔄 將執行: {action} {abs_difference:,} 股")
+        print(f"調整價格: {price:.2f} 元/股")
+        print(f"調整金額: {total_amount:,.2f} 元")
+
+        confirm = input(f"\n確認執行調整？(y/N): ").strip().lower()
+
+        if confirm not in ['y', 'yes']:
+            print("❌ 調整已取消")
+            return
+
+        # 執行調整
+        if difference > 0:
+            # 需要買入
+            self.buy_stock(stock_code, abs_difference, price, 0, f"{note} (調整+{abs_difference})")
+        else:
+            # 需要賣出
+            self.sell_stock(stock_code, abs_difference, price, 0, f"{note} (調整-{abs_difference})")
+
+        print(f"✅ 庫存調整完成！{stock_code} 現在應該有 {target_quantity:,} 股")
+
 
 def main():
     """主程序 - 命令列介面"""
@@ -520,11 +603,12 @@ def main():
         print("\n請選擇操作:")
         print("1. 買入股票")
         print("2. 賣出股票")
-        print("3. 查看庫存")
-        print("4. 查看交易歷史")
-        print("5. 退出")
+        print("3. 調整庫存 (輸入目前總數量)")
+        print("4. 查看庫存")
+        print("5. 查看交易歷史")
+        print("6. 退出")
         
-        choice = input("\n請輸入選項 (1-5): ").strip()
+        choice = input("\n請輸入選項 (1-6): ").strip()
         
         if choice == "1":
             # 買入股票
@@ -569,10 +653,32 @@ def main():
                 print("❌ 請輸入有效的數字")
         
         elif choice == "3":
+            # 調整庫存
+            print("\n🔄 調整庫存")
+            print("輸入目前股票總數量，系統會自動計算差額並新增對應的交易記錄")
+
+            stock_code = input("請輸入股票代碼: ").strip().upper()
+            if not stock_code:
+                print("❌ 股票代碼不能為空")
+                continue
+
+            try:
+                target_quantity = int(input("請輸入目標總數量: "))
+                price = float(input("請輸入調整價格 (元/股): "))
+                note = input("請輸入備註 (可選，預設為'庫存調整'): ").strip()
+
+                if not note:
+                    note = "庫存調整"
+
+                system.adjust_inventory(stock_code, target_quantity, price, note)
+            except ValueError:
+                print("❌ 請輸入有效的數字")
+
+        elif choice == "4":
             # 查看庫存
             system.show_inventory()
-        
-        elif choice == "4":
+
+        elif choice == "5":
             # 查看交易歷史
             print("\n📋 查看交易歷史")
             stock_code = input("股票代碼 (可選，留空顯示全部): ").strip().upper()
@@ -585,7 +691,7 @@ def main():
             except ValueError:
                 system.show_transactions(stock_code, 10)
         
-        elif choice == "5":
+        elif choice == "6":
             print("👋 感謝使用股票庫存管理系統！")
             break
         
