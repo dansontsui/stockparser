@@ -87,6 +87,11 @@ class StockInventorySystem:
         """讀取交易歷史"""
         try:
             df = pd.read_excel(self.excel_file, sheet_name=self.transaction_sheet)
+
+            # 統一日期格式
+            if '交易日期' in df.columns and not df.empty:
+                df['交易日期'] = pd.to_datetime(df['交易日期'], errors='coerce')
+
             return df
         except Exception as e:
             print(f"❌ 讀取交易歷史失敗: {e}")
@@ -114,13 +119,30 @@ class StockInventorySystem:
             else:
                 df_transactions = pd.concat([df_transactions, new_transaction], ignore_index=True)
 
-            # 儲存更新後的交易歷史
-            with pd.ExcelWriter(self.excel_file, mode='a', if_sheet_exists='replace') as writer:
+            # 讀取所有現有工作表
+            existing_sheets = {}
+            try:
+                excel_file = pd.ExcelFile(self.excel_file)
+                for sheet_name in excel_file.sheet_names:
+                    if sheet_name != self.transaction_sheet:
+                        existing_sheets[sheet_name] = pd.read_excel(self.excel_file, sheet_name=sheet_name)
+            except:
+                pass
+
+            # 儲存所有工作表（包括更新後的交易歷史）
+            with pd.ExcelWriter(self.excel_file, engine='openpyxl') as writer:
+                # 保存交易歷史
                 df_transactions.to_excel(writer, sheet_name=self.transaction_sheet, index=False)
+
+                # 保存其他現有工作表
+                for sheet_name, sheet_df in existing_sheets.items():
+                    sheet_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
             print("✅ 交易記錄已新增")
         except Exception as e:
             print(f"❌ 儲存交易記錄失敗: {e}")
+            import traceback
+            traceback.print_exc()
 
     def get_stock_name(self, stock_code: str) -> Optional[str]:
         """
@@ -409,6 +431,17 @@ class StockInventorySystem:
             print("❌ 沒有交易記錄，無法重新索引")
             return
 
+        # 統一日期格式並排序交易記錄
+        print("🔧 統一日期格式...")
+        df_transactions['交易日期'] = pd.to_datetime(df_transactions['交易日期'], errors='coerce')
+
+        # 移除日期無效的記錄
+        invalid_dates = df_transactions['交易日期'].isna()
+        if invalid_dates.any():
+            invalid_count = invalid_dates.sum()
+            print(f"⚠️  移除 {invalid_count} 筆日期無效的記錄")
+            df_transactions = df_transactions.dropna(subset=['交易日期'])
+
         # 按日期排序交易記錄
         df_transactions = df_transactions.sort_values('交易日期')
 
@@ -584,12 +617,21 @@ class StockInventorySystem:
         # 執行調整
         if difference > 0:
             # 需要買入
-            self.buy_stock(stock_code, abs_difference, price, 0, f"{note} (調整+{abs_difference})")
+            self.buy_stock(stock_code, stock_name, abs_difference, price, 0, f"{note} (調整+{abs_difference})")
         else:
             # 需要賣出
             self.sell_stock(stock_code, abs_difference, price, 0, f"{note} (調整-{abs_difference})")
 
         print(f"✅ 庫存調整完成！{stock_code} 現在應該有 {target_quantity:,} 股")
+
+        # 自動執行庫存重新整理
+        print(f"\n🔄 自動執行庫存重新整理...")
+        try:
+            self.reindex_inventory()
+            print(f"✅ 庫存已更新到最新狀態")
+        except Exception as e:
+            print(f"⚠️  自動重新整理失敗: {e}")
+            print(f"💡 請手動執行庫存重新整理確保資料一致性")
 
 
 def main():
@@ -606,9 +648,10 @@ def main():
         print("3. 調整庫存 (輸入目前總數量)")
         print("4. 查看庫存")
         print("5. 查看交易歷史")
-        print("6. 退出")
+        print("6. 重新整理庫存 (根據交易歷史重新計算)")
+        print("7. 退出")
         
-        choice = input("\n請輸入選項 (1-6): ").strip()
+        choice = input("\n請輸入選項 (1-7): ").strip()
         
         if choice == "1":
             # 買入股票
@@ -692,6 +735,21 @@ def main():
                 system.show_transactions(stock_code, 10)
         
         elif choice == "6":
+            # 重新整理庫存
+            print("\n🔄 重新整理庫存")
+            print("根據交易歷史重新計算當前庫存...")
+
+            confirm = input("確認執行庫存重新整理？(y/N): ").strip().lower()
+            if confirm in ['y', 'yes']:
+                try:
+                    system.reindex_inventory()
+                    print("✅ 庫存重新整理完成！")
+                except Exception as e:
+                    print(f"❌ 庫存重新整理失敗: {e}")
+            else:
+                print("❌ 操作已取消")
+
+        elif choice == "7":
             print("👋 感謝使用股票庫存管理系統！")
             break
         
