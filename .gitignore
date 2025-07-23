@@ -92,7 +92,7 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
-
+*.db
 # Chutzpah Test files
 _Chutzpah*
 
@@ -368,3 +368,31 @@ MigrationBackup/
 /.idea/stockparser.iml
 /.idea/vcs.xml
 /stockparser.code-workspace
+mystkdata/stock_data.db
+mystkdata/stock_data.db
+
+# 測試檔案 - 排除所有 test 開頭的檔案
+test*
+test*.py
+test*.bat
+test*.xlsx
+test*.csv
+test*.txt
+test*.log
+
+# 備份檔案
+*_backup_*
+*backup*
+
+# 大型資料庫檔案
+*.db
+sqllite3/brokder.db
+
+# Python 相關
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 暫存檔案
+*.tmp
+*.temp
