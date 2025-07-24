@@ -705,6 +705,42 @@ def main():
                 print("❌ 股票代碼不能為空")
                 continue
 
+            # 立即顯示該股票的現有庫存
+            print(f"\n📊 {stock_code} 現有庫存資訊:")
+            print("-" * 40)
+
+            df_inventory = system._read_inventory()
+            stock_info = df_inventory[df_inventory['股票代碼'] == stock_code]
+
+            if not stock_info.empty:
+                current_qty = int(stock_info.iloc[0]['持有股數'])
+                stock_name = stock_info.iloc[0]['股票名稱']
+                avg_cost = float(stock_info.iloc[0]['平均成本'])
+                total_cost = float(stock_info.iloc[0]['總成本'])
+
+                print(f"股票名稱: {stock_name}")
+                print(f"目前持有: {current_qty:,} 股")
+                print(f"平均成本: {avg_cost:.2f} 元/股")
+                print(f"總成本: {total_cost:,.2f} 元")
+
+                # 顯示最近的交易記錄
+                df_transactions = system._read_transactions()
+                recent_transactions = df_transactions[df_transactions['股票代碼'] == stock_code].tail(3)
+
+                if not recent_transactions.empty:
+                    print(f"\n📋 最近3筆交易:")
+                    for _, row in recent_transactions.iterrows():
+                        date = row['交易日期']
+                        trans_type = row['交易類型']
+                        quantity = row['數量']
+                        price = row['價格']
+                        print(f"  {date.strftime('%Y-%m-%d')} | {trans_type} | {quantity:,} 股 × {price:.2f} 元")
+            else:
+                print(f"⚠️  目前沒有持有 {stock_code}")
+                print("如果要新增此股票，請輸入目標數量")
+
+            print("-" * 40)
+
             try:
                 target_quantity = int(input("請輸入目標總數量: "))
                 price = float(input("請輸入調整價格 (元/股): "))
